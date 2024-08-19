@@ -46,6 +46,19 @@
 - **`GetE()`**: Randomly gets a Vector2 coordinate in the area of error type E.
 - **`GetF()`**: Randomly gets a Vector2 coordinate in the area of error type F.
 
+### Bugs:
+There is a bug in the adaptive feedback generation process, specifically within the `GenerateAdaptiveFeedbackList(List<int> errorList)` method. The issue manifests as the method sometimes entering into an infinite loop.
+
+The approach I used to ensure the MRE decreases continuously involves the following steps:
+1. For each block, I randomly generate the errors (based on the specified number of errors for that block).
+2. I then calculate the MRE for that block.
+3. If the MRE for the current block is less than the MRE of the previous block, I add this block to the final list (after shuffling the block).
+4. Else, if the MRE is greater than or equal to the MRE of the previous block, I discard the block and repeat the random generation process for that block until the MRE is less than the previous one.
+
+The problem arises because as the trials progress, the conditions become more stringent, making it increasingly difficult to generate a block that satisfies the requirement of having a lower MRE than the previous block. This results in a significant increase in computational complexity in later trials, and under certain conditions, the process fails to find a suitable block, leading to an infinite loop.
+
+While I understand that the complexity and computational time increase substantially in later trials, I'm uncertain about the specific reason the method ends up in an infinite loop. This needs further investigation to identify the root cause and implement a solution that prevents the method from endlessly looping.
+
 ---
 
 # Class `GolfBallController`
@@ -127,3 +140,4 @@
 # Namespace `Editor`
 
 **Purpose**: The place for setting the re-fire button to reset the movement.
+

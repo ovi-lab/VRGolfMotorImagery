@@ -120,16 +120,16 @@ public class FinalListGenerator : MonoBehaviour
     }
     public List<Vector2> GenerateAdaptiveFeedbackList(List<int> errorList)
     {
+        if (errorList == null || errorList.Count != 15)
+        {
+            throw new ArgumentException("The errorList must have exactly 15 elements and cannot be null.");
+        }
+
         List<Vector2> finalAdaptiveList = new List<Vector2>();
         int elementEachBlock = 6;
         float initialMRE = CalculateMRE(new List<Vector2> { GetE(), GetF(), GetE(), GetE(), GetE(), holeTransformation });
         float MRELastTime = initialMRE;
-
-        if (errorList.Count != 15)
-        {
-            throw new Exception("The errorList should have exactly 15 elements.");
-        }
-
+        
         for (int i = 0; i < errorList.Count; i++)
         {
             bool findLowerMRE = false;
@@ -143,10 +143,10 @@ public class FinalListGenerator : MonoBehaviour
             while (!findLowerMRE)
             {
                 List<Vector2> errorListInOneBlock = GenerateErrorsInOneBlock(numberOfErrorsThisBlock);
-                block.AddRange(errorListInOneBlock);
                 float MRE_ThisTempBlockList = CalculateMRE(block);
                 if (MRE_ThisTempBlockList < MRELastTime)
                 {
+                    block.AddRange(errorListInOneBlock);
                     block = RandomCounts.ShuffleVector2List(block);
                     finalAdaptiveList.AddRange(block);
                     MRELastTime = MRE_ThisTempBlockList;
@@ -157,21 +157,22 @@ public class FinalListGenerator : MonoBehaviour
         return finalAdaptiveList;
     }
     
-    private float CalculateMRE(List<Vector2> coordinateList)
+    private float CalculateMRE(List<Vector2> errorListInOneBlock)
     {
+        int numTrials = 6;
         float totalError = 0f;
-        int count = coordinateList.Count;
+        int count = errorListInOneBlock.Count;
 
         if (count == 0)
             return 0f;
 
-        foreach (Vector2 coordinate in coordinateList)
+        foreach (Vector2 coordinate in errorListInOneBlock)
         {
             Vector2 errorVector = coordinate - holeTransformation;
 
             totalError += errorVector.magnitude;
         }
-        float MRE = totalError / count;
+        float MRE = totalError / count + numTrials - errorListInOneBlock.Count ;
         return MRE;
     }
     

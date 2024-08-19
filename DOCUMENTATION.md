@@ -40,11 +40,11 @@
 - **`CalculateMRE(List<Vector2> coordinateList)`**: Helper method for `GenerateAdaptiveFeedbackList`. Calculates the MRE in a block. It should be the sum of errors/number of elements in the `errorList` (number of errors) + number of successful trials (error of successful trial is 0).
 - **`GenerateErrorsInOneBlock(int numberOfErrorsThisBlock)`**: Generates the error list in one block. Randomly generates a specific number of errors in one block.
 - **`GetA()`**: Randomly gets a Vector2 coordinate in the area of error type A.
-- **`GetB()`**
-- **`GetC()`**
-- **`GetD()`**
-- **`GetE()`**
-- **`GetF()`**
+- **`GetB()`**: Randomly gets a Vector2 coordinate in the area of error type B.
+- **`GetC()`**: Randomly gets a Vector2 coordinate in the area of error type C.
+- **`GetD()`**: Randomly gets a Vector2 coordinate in the area of error type D.
+- **`GetE()`**: Randomly gets a Vector2 coordinate in the area of error type E.
+- **`GetF()`**: Randomly gets a Vector2 coordinate in the area of error type F.
 
 ---
 

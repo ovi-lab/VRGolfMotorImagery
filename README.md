@@ -12,4 +12,4 @@ This project provides feedback for motor imagery practice.
 
 After each trial, click the **Re-fire** button to move on to the next trial. Repeat this process until all 15 blocks are completed.
 
-For more detailed instructions, please refer to the documentation available on GitHub.
+For more detailed instructions, please refer to the [documentation here](https://github.com/LUDingfu/VRGolf-V2/blob/master/DOCUMENTATION.md)

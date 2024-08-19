@@ -19,7 +19,6 @@ public class DataSaver : MonoBehaviour
     public dataToSave dataToSave;
     public string Id;
     private DatabaseReference dbRef;
-    [SerializeField] private Renderer ballRenderer;
     [SerializeField] private GolfBallController golfBallController;
 
     

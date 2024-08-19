@@ -172,7 +172,7 @@ public class FinalListGenerator : MonoBehaviour
 
             totalError += errorVector.magnitude;
         }
-        float MRE = totalError / count + numTrials - errorListInOneBlock.Count ;
+        float MRE = totalError / (count + numTrials - errorListInOneBlock.Count) ;
         return MRE;
     }
     

@@ -1,7 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
-
-
 public class GolfBallController : MonoBehaviour
 {
     [SerializeField] private float speedFactor = 1.0f;

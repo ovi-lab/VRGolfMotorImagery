@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "482875331860",
+    "firebase_url": "https://vrgolf-543dc-default-rtdb.firebaseio.com",
+    "project_id": "vrgolf-543dc",
+    "storage_bucket": "vrgolf-543dc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:482875331860:android:5e4eefffd3d48f76ddde01",
+        "android_client_info": {
+          "package_name": "com.OVILab.VRGolfFinal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo5Z3jKEuIbZkgBEs4sJMSxJ2Q000SD7A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

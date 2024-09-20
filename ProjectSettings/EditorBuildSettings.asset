@@ -6,10 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Main.unity
+    path: Assets/_Scenes/Base VR.unity
     guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects:
-    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: a4977fdac4ca3ad4fbfa35582c1e29b5,
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: f04165f5fff3ccc4883aff4ef6bb4ad5,
       type: 2}
-    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 71f03e61909516b4dbde9e721299dc44,
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: dccb4c86d9b77d44da7b5e263ffe62dd,
       type: 2}

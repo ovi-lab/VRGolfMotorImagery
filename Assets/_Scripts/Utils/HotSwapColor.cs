@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class HotSwapColor : MonoBehaviour
 {
-    [SerializeField] private Color color;
+    [SerializeField] private List<Color> colors;
     [SerializeField] private MeshRenderer mr;
-    
+
     private MaterialPropertyBlock mpb;
-    private static readonly int ShaderProp = Shader.PropertyToID("_Color");
+    private static readonly int ShaderProp = Shader.PropertyToID("_BaseColor");
 
     private MaterialPropertyBlock Mpb => mpb ??= new MaterialPropertyBlock();
 
@@ -18,21 +19,27 @@ public class HotSwapColor : MonoBehaviour
 
     private void OnValidate()
     {
-        
         ApplyColor();
     }
 
-    public void SetColor(Color color)
+    public void SetColor(Color color, int index)
     {
-        this.color = color;
+        colors[index] = color;
         ApplyColor();
     }
 
     private void ApplyColor()
     {
-        Mpb.SetColor(ShaderProp, color);
-        if(mr != null){
-            mr.SetPropertyBlock(Mpb);
+        for (int i = 0; i < mr.sharedMaterials.Length; i++)
+        {
+            Color targetColor;
+            try { targetColor = colors[i]; }
+            catch { targetColor = new Color(0,0,0); }
+            Mpb.SetColor(ShaderProp, targetColor);
+            if (mr != null)
+            {
+                mr.SetPropertyBlock(Mpb, i);
+            }
         }
     }
 }

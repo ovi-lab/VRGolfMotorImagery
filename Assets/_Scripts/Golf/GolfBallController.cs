@@ -1,44 +1,62 @@
 ﻿using System.Collections;
-using Unity.Mathematics;
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 
 public class GolfBallController : MonoBehaviour
 {
     [SerializeField] private Transform holeTransform;
+    [SerializeField] private TextMeshProUGUI tmp;
+
 
     public Transform HoleTransform => holeTransform;
 
-    [SerializeField] private float forceMultiplier;
-    [SerializeField] private float extraFriction;
 
+    private Vector3 targetPosition;
     private Rigidbody rb;
     private Vector3 startPosition;
+    private bool isMoving;
+    private float maxDistance;
+    private float maxSpeed;
+
+    private float startTime;
 
     private void Start()
     {
         startPosition = transform.position;
         rb = GetComponent<Rigidbody>();
+
+        List<float> values = RandomValueGenerator.GenerateValues(27, 0.775f, 0.01f, 1);
+        Debug.Log(values.Average());
     }
 
     private void FixedUpdate()
     {
-        // rb.AddForce(-rb.velocity * extraFriction);
-    }
-
-    public void FireBall(Vector3 targetPosition)
-    {
+        if (!isMoving) return;
+        Vector3 direction = (targetPosition - transform.position).normalized;
         float distance = Vector3.Distance(transform.position, targetPosition);
-        Vector3 targetDirection = (targetPosition - transform.position).normalized;
-        float initVelocityMag = Mathf.Sqrt(2 * extraFriction * rb.mass * 9.8f * distance);
-        rb.velocity = Vector3.zero;
-        rb.velocity = initVelocityMag * targetDirection;
-        StartCoroutine(Logger(6.5f));
+        if(distance > 0.05f)
+        {
+            float easingFactor = 1 - Mathf.Exp(-distance * 0.3f);
+            rb.velocity = (direction * (easingFactor * maxSpeed)).XZPlane(-1.2f); //hack to make falling look realistic
+        }
+        else
+        {
+            rb.velocity = Vector3.zero;
+            isMoving = false;
+        }
+
     }
 
-    private IEnumerator Logger(float time)
+    public void FireBall(Vector3 position)
     {
-        yield return new WaitForSeconds(time);
-        Debug.Log("In Hole?");
+        targetPosition = position;
+        maxDistance = Vector3.Distance(transform.position, targetPosition);
+        tmp.text = "[DEBUG]\nPerfect Trial";
+        maxSpeed = maxDistance / 2f;
+        isMoving = true;
+        startTime = Time.time;
     }
 
     public void ResetBall()
@@ -47,5 +65,7 @@ public class GolfBallController : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         transform.rotation = Quaternion.identity;
+        isMoving = false;
+        Debug.ClearDeveloperConsole();
     }
 }

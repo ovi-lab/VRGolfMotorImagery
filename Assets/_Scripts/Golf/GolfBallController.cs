@@ -1,9 +1,13 @@
 ﻿using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class GolfBallController : MonoBehaviour
 {
     [SerializeField] private Transform holeTransform;
+
+    public Transform HoleTransform => holeTransform;
+
     [SerializeField] private float forceMultiplier;
     [SerializeField] private float extraFriction;
 
@@ -18,16 +22,16 @@ public class GolfBallController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rb.AddForce(Vector3.down * 9.8f);
-        rb.AddForce(-rb.velocity * extraFriction);
+        // rb.AddForce(-rb.velocity * extraFriction);
     }
 
-    public void FireBall()
+    public void FireBall(Vector3 targetPosition)
     {
-        float distance = Vector3.Distance(transform.position, holeTransform.position);
-        float velocityMagnitude = forceMultiplier * distance;
-        Vector3 direction = (holeTransform.position - transform.position).normalized;
-        rb.AddForce(velocityMagnitude * direction, ForceMode.Force);
+        float distance = Vector3.Distance(transform.position, targetPosition);
+        Vector3 targetDirection = (targetPosition - transform.position).normalized;
+        float initVelocityMag = Mathf.Sqrt(2 * extraFriction * rb.mass * 9.8f * distance);
+        rb.velocity = Vector3.zero;
+        rb.velocity = initVelocityMag * targetDirection;
         StartCoroutine(Logger(6.5f));
     }
 

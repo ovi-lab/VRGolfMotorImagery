@@ -12,7 +12,7 @@ namespace UnityLibrary
             GolfBallController g = (GolfBallController)target;
             if (GUILayout.Button("Fire Ball"))
             {
-                g.FireBall();
+                g.FireBall(g.HoleTransform.position);
             }
 
             if (GUILayout.Button("Reset Ball"))

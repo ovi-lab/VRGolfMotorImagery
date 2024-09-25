@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -17,6 +18,9 @@ public class GolfBallController : MonoBehaviour
     private Rigidbody rb;
     private Vector3 startPosition;
     private bool isMoving;
+
+    public bool IsMoving => isMoving;
+
     private float maxDistance;
     private float maxSpeed;
 
@@ -29,6 +33,12 @@ public class GolfBallController : MonoBehaviour
 
         List<float> values = RandomValueGenerator.GenerateValues(27, 0.775f, 0.01f, 1);
         Debug.Log(values.Average());
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        rb.velocity = Vector3.zero;
+        isMoving = false;
     }
 
     private void FixedUpdate()

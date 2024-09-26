@@ -1,10 +1,9 @@
-﻿
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+[RequireComponent(typeof(TrialHandler))]
 public class TrialHandler : SingletonMonoBehavior<TrialHandler>
 {
     [Range(0, 180),SerializeField] private float maxErrorAngle;

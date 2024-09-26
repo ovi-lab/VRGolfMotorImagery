@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,7 +11,7 @@ public class InputHandler : SingletonMonoBehavior<InputHandler>
 
     private List<ActionBasedController> allControllers = new List<ActionBasedController>();
     private List<bool> allTriggers = new List<bool>();
-
+    private bool canInput = true;
 
     private void OnEnable()
     {
@@ -23,13 +24,30 @@ public class InputHandler : SingletonMonoBehavior<InputHandler>
         allTriggers.Clear();
         foreach (ActionBasedController controller in allControllers)
         {
-            allTriggers.Add(controller.activateAction.action.ReadValue<float>() >= 0.5f);
-            allTriggers.Add(controller.selectAction.action.ReadValue<float>() >= 0.5f);
+            allTriggers.Add(controller.activateAction.action.ReadValue<float>() >= 0.9f);
+            allTriggers.Add(controller.selectAction.action.ReadValue<float>() >= 0.9f);
         }
         if (allTriggers.Any(trigger => trigger))
         {
+            if (!canInput) return;
             OnButtonPress?.Invoke();
+            canInput = false;
+            StartCoroutine(InputCooldown());
         }
 
+    }
+
+    private IEnumerator InputCooldown()
+    {
+        yield return new WaitForSeconds(0.3f);
+        canInput = true;
+    }
+
+    public void SimulateInput()
+    {
+        if (!canInput) return;
+        OnButtonPress?.Invoke();
+        canInput = false;
+        StartCoroutine(InputCooldown());
     }
 }

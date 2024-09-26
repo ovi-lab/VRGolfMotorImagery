@@ -22,7 +22,13 @@ public class HotSwapColor : MonoBehaviour
         ApplyColor();
     }
 
-    public void SetColor(Color color, int index)
+    public void SetAlpha(float alpha, int index = 0)
+    {
+        colors[index] = new Color(colors[index].r, colors[index].g, colors[index].b, alpha);
+        ApplyColor();
+    }
+
+    public void SetColor(Color color, int index = 0)
     {
         colors[index] = color;
         ApplyColor();

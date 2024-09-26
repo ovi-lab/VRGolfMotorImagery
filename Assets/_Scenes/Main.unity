@@ -325,9 +325,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 31020248}
-  - component: {fileID: 31020247}
-  - component: {fileID: 31020246}
   - component: {fileID: 31020249}
+  - component: {fileID: 31020250}
   m_Layer: 0
   m_Name: ExperimentManager
   m_TagString: Untagged
@@ -335,41 +334,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &31020246
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 31020245}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2abc96eed69e4e52889ed9dc79954069, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  golfBall: {fileID: 236231307}
-  hole: {fileID: 1650509753}
---- !u!114 &31020247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 31020245}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51305070c7ca4d819eebe996c6e729fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxErrorAngle: 173
-  minErrorDistance: 0.1
-  maxErrorDistance: 1.41
-  controller: {fileID: 236231307}
-  holePosition: {fileID: 1650509753}
-  meanRadialError: 1
-  totalTrialCount: 90
-  percentageError: 30
-  tmp: {fileID: 1450713087}
 --- !u!4 &31020248
 Transform:
   m_ObjectHideFlags: 0
@@ -397,11 +361,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ccbba197534d82a1e2aac42c17385e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controller: {fileID: 236231307}
   tv: {fileID: 1450713087}
   welcomeMessage: Welcome
   welcomeBackMessage: Welcome Back
-  motorImageryMessage: Please Perform Motor Imagery
+  motorImageryMessage: "Please Perform Motor Imagery\nPull Trigger when ready\t"
   golfMessage: 
+  restMessage: 'Please take some rest
+
+    Pull Trigger when ready'
+  thanksMessage: Thank you for taking part!
+--- !u!114 &31020250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31020245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63d64e8305da4f04bb1db24c584b6fe3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockCount: 15
+  trialCountPerBlock: 6
+  percentageError: 30
+  minErroneousTrialsPerBlock: 1
+  maxErroneousTrialsPerBlock: 3
+  holeTransform: {fileID: 1650509753}
+  maxErrorAngle: 174
+  minErrorDistance: 0.1
+  maxErrorDistance: 1.39
+  meanRadialError: 0.8
 --- !u!1 &40850374
 GameObject:
   m_ObjectHideFlags: 0
@@ -952,6 +943,7 @@ GameObject:
   - component: {fileID: 236231309}
   - component: {fileID: 236231308}
   - component: {fileID: 236231307}
+  - component: {fileID: 236231310}
   m_Layer: 0
   m_Name: GolfBall
   m_TagString: Untagged
@@ -987,8 +979,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fb49c557d70407cb592dd9f1fa9195f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnBallStop:
+    m_PersistentCalls:
+      m_Calls: []
   holeTransform: {fileID: 1650509753}
-  tmp: {fileID: 1450713087}
 --- !u!135 &236231308
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1037,6 +1031,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &236231310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 236231305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86b5e3cae95c455cbf3d177f361cfe69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  effectType: 1
+  animTime: 1
+  meshRenderer: {fileID: 2051347086}
+  sphereTransform: {fileID: 236231306}
+  hotSwapColor: {fileID: 2051347088}
 --- !u!1 &318842618
 GameObject:
   m_ObjectHideFlags: 0
@@ -3585,15 +3596,20 @@ Material:
   m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _ALPHAPREMULTIPLY_ON
+  - _SPECULAR_SETUP
+  - _SURFACE_TYPE_TRANSPARENT
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap:
-    RenderType: Opaque
-  disabledShaderPasses: []
+    RenderType: Transparent
+  disabledShaderPasses:
+  - DepthOnly
+  - SHADOWCASTER
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -3667,8 +3683,8 @@ Material:
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
-    - _DstBlend: 0
-    - _DstBlendAlpha: 0
+    - _DstBlend: 10
+    - _DstBlendAlpha: 10
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -3678,14 +3694,14 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Smoothness: 0.5
+    - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
-    - _Surface: 0
-    - _WorkflowMode: 1
-    - _ZWrite: 1
+    - _Surface: 1
+    - _WorkflowMode: 0
+    - _ZWrite: 0
     m_Colors:
     - _BaseColor: {r: 0.764151, g: 0.764151, b: 0.764151, a: 0}
     - _Color: {r: 0.764151, g: 0.764151, b: 0.764151, a: 0}
@@ -3879,7 +3895,7 @@ Transform:
   m_GameObject: {fileID: 1939296436}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0.03, y: 0.34, z: 1.583}
+  m_LocalPosition: {x: 0.03, y: 0.34, z: 1.588}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4107,7 +4123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colors:
-  - {r: 1, g: 1, b: 1, a: 0}
+  - {r: 1, g: 1, b: 1, a: 1}
   mr: {fileID: 2051347086}
 --- !u!1 &2089899396
 GameObject:

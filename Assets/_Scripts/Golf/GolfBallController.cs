@@ -1,44 +1,36 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using TMPro;
+﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GolfBallController : MonoBehaviour
 {
-    [SerializeField] private Transform holeTransform;
-    [SerializeField] private TextMeshProUGUI tmp;
+    public UnityEvent OnBallStop;
 
+    [SerializeField] private Transform holeTransform;
 
     public Transform HoleTransform => holeTransform;
-
 
     private Vector3 targetPosition;
     private Rigidbody rb;
     private Vector3 startPosition;
     private bool isMoving;
-
-    public bool IsMoving => isMoving;
-
     private float maxDistance;
     private float maxSpeed;
-
-    private float startTime;
+    private Phaser phaser;
 
     private void Start()
     {
         startPosition = transform.position;
         rb = GetComponent<Rigidbody>();
-
-        List<float> values = RandomValueGenerator.GenerateValues(27, 0.775f, 0.01f, 1);
-        Debug.Log(values.Average());
+        phaser = GetComponent<Phaser>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
         rb.velocity = Vector3.zero;
         isMoving = false;
+        phaser.PhaseOut();
+        StartCoroutine(EndAnimTime(phaser.AnimTime));
     }
 
     private void FixedUpdate()
@@ -55,18 +47,37 @@ public class GolfBallController : MonoBehaviour
         {
             rb.velocity = Vector3.zero;
             isMoving = false;
+            phaser.PhaseOut();
+            StartCoroutine(EndAnimTime(phaser.AnimTime));
         }
 
     }
 
     public void FireBall(Vector3 position)
     {
+        phaser.PhaseIn();
+        StartCoroutine(AnimTime(phaser.AnimTime, position));
+    }
+
+    private IEnumerator AnimTime(float time, Vector3 position)
+    {
+        yield return new WaitForSeconds(time);
+        ActuallyFireBall(position);
+    }
+
+    private IEnumerator EndAnimTime(float time)
+    {
+        yield return new WaitForSeconds(time);
+        OnBallStop?.Invoke();
+        ResetBall();
+    }
+
+    private void ActuallyFireBall(Vector3 position)
+    {
         targetPosition = position;
         maxDistance = Vector3.Distance(transform.position, targetPosition);
-        tmp.text = "[DEBUG]\nPerfect Trial";
         maxSpeed = maxDistance / 2f;
         isMoving = true;
-        startTime = Time.time;
     }
 
     public void ResetBall()

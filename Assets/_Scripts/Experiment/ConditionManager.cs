@@ -12,6 +12,10 @@ public class ConditionManager : MonoBehaviour
     [SerializeField] private int minErroneousTrialsPerBlock;
     [SerializeField] private int maxErroneousTrialsPerBlock;
 
+    [Header("Control Condition Settings")]
+    [SerializeField] private float minTime = 6f;
+    [SerializeField] private float maxTime = 8f;
+
     [Header("Perfect Condition Settings")]
     [SerializeField] private Transform holeTransform;
 
@@ -24,20 +28,38 @@ public class ConditionManager : MonoBehaviour
     private List<Vector3> errorPositions = new List<Vector3>();
     private List<Block> allBlocks = new List<Block>();
 
-    public List<Block> GenerateBlocks(int condition)
+    public List<Block> GenerateBlocks(char condition)
     {
         switch (condition)
         {
-            case 0:
+            case 'c':
+                GenerateControlCondition();
                 return allBlocks;
-            case 1:
+            case 'p':
                 GeneratePerfectCondition();
                 return allBlocks;
-            case 2:
+            case 'r':
                 GenerateRandomCondition();
                 return allBlocks;
             default:
                 throw new Exception("Not a valid condition type");
+        }
+    }
+
+    private void GenerateControlCondition()
+    {
+        for (int i = 0; i < blockCount; i++)
+        {
+            Block block = new Block();
+            block.Trials = new List<Trial>();
+            for (int j = 0; j < trialCountPerBlock; j++)
+            {
+                Trial trial = new Trial();
+                trial.Type = ConditionType.Control;
+                trial.TargetPosition = new Vector3(minTime, 0f, maxTime);
+                block.Trials.Add(trial);
+            }
+            allBlocks.Add(block);
         }
     }
 
@@ -209,9 +231,7 @@ public class Trial
 
 public enum ConditionType
 {
+    Control = 0,
     Perfect = 1,
     Error = 2
 }
-
-
-

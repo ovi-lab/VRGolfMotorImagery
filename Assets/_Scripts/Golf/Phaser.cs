@@ -9,7 +9,11 @@ public class Phaser : MonoBehaviour
     [SerializeField] private Transform sphereTransform;
     [SerializeField] private HotSwapColor hotSwapColor;
 
+    private Coroutine phaseInCoroutine;
+    private Coroutine phaseOutCoroutine;
+
     public float AnimTime => animTime;
+
 
     private void Start()
     {
@@ -21,19 +25,27 @@ public class Phaser : MonoBehaviour
         switch (effectType)
         {
             case EffectType.Appear:
-                StartCoroutine(Appear(true));
+                phaseInCoroutine = StartCoroutine(Appear(true));
                 break;
             case EffectType.Fade:
                 meshRenderer.enabled = true;
                 hotSwapColor.SetAlpha(0f);
-                StartCoroutine(Fade(0, 1));
+                phaseInCoroutine = StartCoroutine(Fade(0, 1));
                 break;
             case EffectType.Zoom:
                 sphereTransform.localScale = Vector3.zero;
                 meshRenderer.enabled = true;
-                StartCoroutine(Zoom(Vector3.zero, Vector3.one));
+                phaseInCoroutine = StartCoroutine(Zoom(Vector3.zero, Vector3.one));
                 break;
         }
+    }
+
+    public void Disappear()
+    {
+        if(phaseInCoroutine!=null) StopCoroutine(phaseInCoroutine);
+        if(phaseOutCoroutine!=null) StopCoroutine(phaseOutCoroutine);
+        StopAllCoroutines();
+        meshRenderer.enabled = false;
     }
 
     public void PhaseOut()
@@ -41,22 +53,22 @@ public class Phaser : MonoBehaviour
         switch (effectType)
         {
             case EffectType.Appear:
-                StartCoroutine(Appear(false));
+                phaseOutCoroutine = StartCoroutine(Appear(false));
                 break;
             case EffectType.Fade:
-                StartCoroutine(Fade(1, 0, () => meshRenderer.enabled = false));
+                phaseOutCoroutine = StartCoroutine(Fade(1, 0, () => meshRenderer.enabled = false));
                 break;
             case EffectType.Zoom:
-                StartCoroutine(Zoom(Vector3.one, Vector3.zero, () => meshRenderer.enabled = false));
+                phaseOutCoroutine = StartCoroutine(Zoom(Vector3.one, Vector3.zero, () => meshRenderer.enabled = false));
                 break;
         }
     }
 
     private IEnumerator Appear(bool state)
     {
-        if (state) meshRenderer.enabled = state;
+        if (state) meshRenderer.enabled = true;
         yield return new WaitForSeconds(animTime);
-        if (!state) meshRenderer.enabled = state;
+        if (!state) meshRenderer.enabled = false;
     }
 
     private IEnumerator Fade(float startAlpha, float endAlpha, System.Action onComplete = null)

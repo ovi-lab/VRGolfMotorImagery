@@ -8,7 +8,6 @@ public class GolfBallController : MonoBehaviour
 
     [SerializeField] private Transform holeTransform;
 
-    public Transform HoleTransform => holeTransform;
 
     private Vector3 targetPosition;
     private Rigidbody rb;
@@ -17,6 +16,9 @@ public class GolfBallController : MonoBehaviour
     private float maxDistance;
     private float maxSpeed;
     private Phaser phaser;
+
+    public Transform HoleTransform => holeTransform;
+    public Phaser Phaser => phaser;
 
     private void Start()
     {

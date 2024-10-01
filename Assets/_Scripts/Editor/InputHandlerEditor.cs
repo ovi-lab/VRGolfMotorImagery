@@ -10,9 +10,14 @@ namespace UnityLibrary
         public override void OnInspectorGUI()
         {
             InputHandler i = (InputHandler)target;
-            if (GUILayout.Button("Simulate Input"))
+            if (GUILayout.Button("Simulate Trigger"))
             {
                 i.SimulateInput();
+            }
+
+            if (GUILayout.Button("Simulate Undo"))
+            {
+                i.SimulateUndo();
             }
             DrawDefaultInspector();
         }

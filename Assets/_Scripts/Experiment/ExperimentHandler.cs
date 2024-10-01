@@ -156,13 +156,13 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     private void OnEnable()
     {
         InputHandler.Instance.OnTriggerPull += HandleInput;
-        InputHandler.Instance.OnUndoButtonPress += HandleUndo;
+        InputHandler.Instance.OnCancelTrial += HandleUndo;
     }
 
     private void OnDisable()
     {
         InputHandler.Instance.OnTriggerPull -= HandleInput;
-        InputHandler.Instance.OnUndoButtonPress -= HandleUndo;
+        InputHandler.Instance.OnCancelTrial -= HandleUndo;
     }
 
     private void HandleInput()

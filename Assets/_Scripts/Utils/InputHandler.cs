@@ -1,46 +1,73 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class InputHandler : SingletonMonoBehavior<InputHandler>
 {
     public UnityAction OnTriggerPull;
-    public UnityAction OnUndoButtonPress;
-
-    [SerializeField] private TextMeshProUGUI tv;
+    public UnityAction OnCancelTrial;
 
     [SerializeField] private ActionBasedController rightController;
+    [SerializeField] private ActionBasedController leftController;
+    [SerializeField] private float undoTimeWindow;
 
-    private List<bool> allTriggers = new List<bool>();
     private bool canInput = true;
     private bool canUndo = true;
-    private bool isInPulledState = false;
+    private bool rightIsInPulledState;
+    private bool leftIsInPulledState;
+    private float undoInputFrameCount = 0f;
 
     private void Update()
     {
-        float selectAction = rightController.selectAction.action.ReadValue<float>();
-        float activateAction = rightController.activateAction.action.ReadValue<float>();
+        float rightSelectAction = rightController.selectAction.action.ReadValue<float>();
+        float rightActivateAction = rightController.activateAction.action.ReadValue<float>();
 
-        if (isInPulledState && selectAction < 0.2f && activateAction < 0.2f) isInPulledState = false;
-        if (isInPulledState) return;
-        allTriggers.Add(activateAction >= 0.9f);
-        allTriggers.Add(selectAction >= 0.9f);
-
-        if (allTriggers.Any(trigger => trigger))
+        if (rightIsInPulledState && rightSelectAction < 0.2f && rightActivateAction < 0.2f)
         {
-            if (!canInput) return;
-            OnTriggerPull?.Invoke();
-            canInput = false;
-            isInPulledState = true;
-            StartCoroutine(InputCooldown());
+            rightIsInPulledState = false;
+        }
+        if (!rightIsInPulledState)
+        {
+            if (rightActivateAction >= 0.9f || rightSelectAction >= 0.9f)
+            {
+                if (!canInput) return;
+                OnTriggerPull?.Invoke();
+                canInput = false;
+                rightIsInPulledState = true;
+                StartCoroutine(InputCooldown());
+            }
         }
 
+        float leftSelectAction = leftController.selectAction.action.ReadValue<float>();
+        float leftActivateAction = leftController.activateAction.action.ReadValue<float>();
+
+        if (leftIsInPulledState && leftSelectAction < 0.2f && leftActivateAction < 0.2f)
+        {
+            leftIsInPulledState = false;
+        }
+
+        if(!leftIsInPulledState)
+        {
+            if (leftSelectAction > 0.9f && leftActivateAction > 0.9f)
+            {
+                undoInputFrameCount += 1f;
+            }
+            else undoInputFrameCount = 0f;
+
+            if (undoInputFrameCount > undoTimeWindow/Time.deltaTime)
+            {
+                if (!canUndo) return;
+                OnCancelTrial?.Invoke();
+                canUndo = false;
+                leftIsInPulledState = true;
+                undoInputFrameCount = 0;
+                StartCoroutine(UndoCooldown());
+            }
+        }
     }
 
     private IEnumerator InputCooldown()
@@ -66,7 +93,7 @@ public class InputHandler : SingletonMonoBehavior<InputHandler>
     public void SimulateUndo()
     {
         if (!canUndo) return;
-        OnUndoButtonPress?.Invoke();
+        OnCancelTrial?.Invoke();
         canUndo = false;
         StartCoroutine(UndoCooldown());
     }

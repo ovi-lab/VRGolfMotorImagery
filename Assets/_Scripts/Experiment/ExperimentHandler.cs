@@ -18,7 +18,12 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     [TextArea, SerializeField] private string welcomeBackMessage;
     [TextArea, SerializeField] private string motorImageryMessage;
     [TextArea, SerializeField] private string golfMessage;
-    [TextArea, SerializeField] private string restMessage;
+    [TextArea, SerializeField] private string trialEndMessage;
+    [TextArea, SerializeField] private string blockEndMessage;
+    [TextArea, SerializeField] private string canceledPreviousTrial;
+    [SerializeField] private bool showPrevTrialNumInMessage;
+    [TextArea, SerializeField] private string canceledCurrentTrial;
+    [SerializeField] private bool showCurrTrialNumInMessage;
     [TextArea, SerializeField] private string thanksMessage;
 
     private string pid;
@@ -30,6 +35,8 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     private bool isBlockActive;
     private bool isTrialActive;
     private bool isBallMoving;
+    private bool invalidConfig;
+    private bool experimentEnd;
     private string startTime;
     private string endTime;
     private string ballFireTime;
@@ -55,6 +62,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             {
                 tv.text
                     = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nConfig File is missing";
+                invalidConfig = true;
                 return;
             }
 
@@ -71,6 +79,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             {
                 tv.text
                     = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nInvalid Condition";
+                invalidConfig = true;
                 return;
             }
 
@@ -91,6 +100,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             {
                 tv.text
                     = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nInvalid Condition";
+                invalidConfig = true;
                 return;
             }
 
@@ -125,6 +135,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
                 default:
                     tv.text
                         = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nInvalid Session";
+                    invalidConfig = true;
                     return;
             }
 
@@ -150,6 +161,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
         {
             tv.text =
                 "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup";
+            invalidConfig = true;
         }
     }
 
@@ -167,6 +179,8 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 
     private void HandleInput()
     {
+        if (invalidConfig) return;
+        if (experimentEnd) return;
         if (!receivedAllBlocks) Debug.LogError("HOW DID WE GET HERE?");
         if (!isBlockActive) StartBlock();
         else if (isBlockActive && !isTrialActive) StartTrial();
@@ -179,6 +193,8 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 
     private void HandleUndo()
     {
+        if (invalidConfig) return;
+        if (experimentEnd) return;
         if (!receivedAllBlocks) Debug.LogError("HOW DID WE GET HERE?");
         UndoTrial();
     }
@@ -290,7 +306,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
         }
         else
         {
-            tv.text = "Please press the trigger to continue.";
+            tv.text = trialEndMessage;
         }
     }
 
@@ -309,10 +325,11 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
         {
             tv.text = thanksMessage;
             Debug.Log($"Experiment Ended");
+            experimentEnd = true;
         }
         else
         {
-            tv.text = restMessage;
+            tv.text = blockEndMessage;
         }
     }
 
@@ -368,7 +385,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             controller.ResetBall();
             isBallMoving = false;
             File.AppendAllText(failedFilePath, string.Join(",", logFailedEntry) + "\n");
-            tv.text = $"Cancelled trial {block}:{trial}\nPress trigger to continue";
+            tv.text = showCurrTrialNumInMessage ? $"{block}:{trial}\n" + canceledCurrentTrial : canceledCurrentTrial;
         }
         else
         {
@@ -391,7 +408,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
                 trial = allBlocks[block - 1].Trials.Count;
                 isBlockActive = true;
             }
-            tv.text = $"Undid trial {block}:{trial}\nPress trigger to continue";
+            tv.text = showPrevTrialNumInMessage ? $"{block}:{trial}\n" + canceledPreviousTrial : canceledPreviousTrial;
         }
         isTrialActive = false;
     }

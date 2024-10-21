@@ -11,9 +11,12 @@ using Random = UnityEngine.Random;
 [RequireComponent(typeof(ConditionManager))]
 public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 {
+    [Header("References")]
     [SerializeField] private GolfBallController controller;
     [SerializeField] private TextMeshProUGUI tv;
-    [Range(2, 10), SerializeField] private int maximumSessionCount;
+    [SerializeField] private Transform xrCameraOffset;
+    [SerializeField] private TextMeshProUGUI blockTrailIndicator;
+    [Header("Messages")]
     [TextArea, SerializeField] private string welcomeMessage;
     [TextArea, SerializeField] private string welcomeBackMessage;
     [TextArea, SerializeField] private string motorImageryMessage;
@@ -21,6 +24,8 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     [TextArea, SerializeField] private string trialEndMessage;
     [TextArea, SerializeField] private string blockEndMessage;
     [TextArea, SerializeField] private string canceledPreviousTrial;
+    [Header("Additional Parameters")]
+    [Range(2, 10), SerializeField] private int maximumSessionCount;
     [SerializeField] private bool showPrevTrialNumInMessage;
     [TextArea, SerializeField] private string canceledCurrentTrial;
     [SerializeField] private bool showCurrTrialNumInMessage;
@@ -82,10 +87,18 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
                 invalidConfig = true;
                 return;
             }
-
+            float height = float.Parse(lines[3].Split(':')[1].Trim());
+            if (height < 0.5f || height > 2.5f)
+            {
+                tv.text
+                    = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nInvalid Height";
+                invalidConfig = true;
+                return;
+            }
+            xrCameraOffset.position = xrCameraOffset.position.SetY(height);
             try
             {
-                participantName = lines[3].Split(':')[1].Trim();
+                participantName = lines[4].Split(':')[1].Trim();
             }
             catch
             {
@@ -153,12 +166,13 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 
             dataFilePath = Path.Combine(participantPath, dataFileName);
             File.WriteAllText(dataFilePath,
-                "pid,condition,session,block,trial,success,start_time,ball_fire_time,ball_stop_time,end_time,radial_error\n");
+                "pid,condition,session,block,trial,interrupted_trial,start_time,ball_fire_time,ball_stop_time,end_time,radial_error\n");
             allBlocks = GetComponent<ConditionManager>().GenerateBlocks(condition);
             receivedAllBlocks = true;
         }
-        catch
+        catch (Exception e)
         {
+            Debug.Log(e);
             tv.text =
                 "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup";
             invalidConfig = true;
@@ -231,6 +245,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
         isTrialActive = true;
         tv.text = motorImageryMessage;
         Debug.Log($"Trial Started: {trial}");
+        blockTrailIndicator.text = $"{block} {trial}";
     }
 
     private void FireBall()
@@ -337,7 +352,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     {
         string radialErrorString = radialError >= 0 ? radialError.ToString(CultureInfo.InvariantCulture) : "N/A";
         string logEntry =
-            $"{pid},{condition},{session},{block},{trial},True,{startTime},{ballFireTime},{ballStopTime},{endTime},{radialErrorString}\n";
+            $"{pid},{condition},{session},{block},{trial},False,{startTime},{ballFireTime},{ballStopTime},{endTime},{radialErrorString}\n";
         File.AppendAllText(dataFilePath, logEntry);
         Debug.Log("Logged Data");
     }
@@ -372,7 +387,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 
         if (isTrialActive)
         {
-            string logFailedEntry = $"{pid},{condition},{session},{block},{trial},False,{startTime}";
+            string logFailedEntry = $"{pid},{condition},{session},{block},{trial},True,{startTime}";
             if (isBallMoving)
             {
                 logFailedEntry += $",{ballFireTime},N/A,N/A,N/A";
@@ -396,7 +411,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             }
 
             string[] failedTrialData = lastRecordedTrial.Split(',');
-            failedTrialData[5] = "False";
+            failedTrialData[5] = "True";
             File.AppendAllText(failedFilePath, string.Join(",", failedTrialData) + "\n");
             File.WriteAllLines(dataFilePath, allLines.Take(allLines.Length - 1).ToArray());
             controller.Phaser.Disappear();

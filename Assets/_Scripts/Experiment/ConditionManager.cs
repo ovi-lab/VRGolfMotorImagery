@@ -177,14 +177,6 @@ public class ConditionManager : MonoBehaviour
             }
         }
     }
-
-    // public bool ValidateConstraints()
-    // {
-    //     int blockMinError = blockCount * minErroneousTrialsPerBlock;
-    //     int blockMaxError = blockCount * maxErroneousTrialsPerBlock;
-    //     int expectedErrorCount = (int)(blockCount * trialCountPerBlock * percentageError * 0.01f);
-    //     return expectedErrorCount >= blockMinError && expectedErrorCount <= blockMaxError;
-    // }
 }
 
 [Serializable]

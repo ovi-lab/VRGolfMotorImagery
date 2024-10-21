@@ -25,8 +25,8 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     [TextArea, SerializeField] private string trialEndMessage;
     [TextArea, SerializeField] private string blockEndMessage;
     [TextArea, SerializeField] private string canceledPreviousTrial;
-    [TextArea, SerializeField] private string thanksMessage;
     [TextArea, SerializeField] private string canceledCurrentTrial;
+    [TextArea, SerializeField] private string thanksMessage;
     [Header("Additional Parameters")]
     [Range(2, 10), SerializeField] private int maximumSessionCount;
     [SerializeField] private bool showPrevTrialNumInMessage;

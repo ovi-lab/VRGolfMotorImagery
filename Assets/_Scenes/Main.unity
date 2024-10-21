@@ -414,21 +414,19 @@ MonoBehaviour:
   blockTrailIndicator: {fileID: 444374908}
   welcomeMessage: Welcome
   welcomeBackMessage: Welcome Back
-  motorImageryMessage: 'Please perform Motor Imagery
+  motorImageryMessage: 'Please perform motor imagery
 
-    Press Trigger when ready'
+    Press trigger when ready'
   golfMessage: 
   trialEndMessage: Press Trigger to continue
-  blockEndMessage: 'Take some rest
-
-    Press Trigger to continue'
+  blockEndMessage: take a break or press trigger to continue
   canceledPreviousTrial: 'Previous Trial Canceled
 
     Press Trigger to continue'
-  thanksMessage: Thank you for taking part in this experiment!
   canceledCurrentTrial: 'Current Trial Canceled
 
     Press Trigger to continue'
+  thanksMessage: Thank you for taking part in this experiment!
   maximumSessionCount: 4
   showPrevTrialNumInMessage: 1
   showCurrTrialNumInMessage: 1

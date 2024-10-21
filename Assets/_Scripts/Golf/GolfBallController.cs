@@ -8,7 +8,6 @@ public class GolfBallController : MonoBehaviour
 
     [SerializeField] private Transform holeTransform;
 
-
     private Vector3 targetPosition;
     private Rigidbody rb;
     private Vector3 startPosition;

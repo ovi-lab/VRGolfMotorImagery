@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using TMPro;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -14,7 +15,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     [Header("References")]
     [SerializeField] private GolfBallController controller;
     [SerializeField] private TextMeshProUGUI tv;
-    [SerializeField] private Transform xrCameraOffset;
+    [SerializeField] private XROrigin xrOrigin;
     [SerializeField] private TextMeshProUGUI blockTrailIndicator;
     [Header("Messages")]
     [TextArea, SerializeField] private string welcomeMessage;
@@ -24,12 +25,13 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     [TextArea, SerializeField] private string trialEndMessage;
     [TextArea, SerializeField] private string blockEndMessage;
     [TextArea, SerializeField] private string canceledPreviousTrial;
+    [TextArea, SerializeField] private string thanksMessage;
+    [TextArea, SerializeField] private string canceledCurrentTrial;
     [Header("Additional Parameters")]
     [Range(2, 10), SerializeField] private int maximumSessionCount;
     [SerializeField] private bool showPrevTrialNumInMessage;
-    [TextArea, SerializeField] private string canceledCurrentTrial;
     [SerializeField] private bool showCurrTrialNumInMessage;
-    [TextArea, SerializeField] private string thanksMessage;
+    [SerializeField] private bool enableConsoleDebugging = false;
 
     private string pid;
     private int session;
@@ -87,22 +89,34 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
                 invalidConfig = true;
                 return;
             }
-            float height = float.Parse(lines[3].Split(':')[1].Trim());
-            if (height < 0.5f || height > 2.5f)
+
+            try
+            {
+                float height = float.Parse(lines[3].Split(':')[1].Trim());
+                if (height < 0.5f || height > 2.5f)
+                {
+                    tv.text
+                        = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nInvalid Height";
+                    invalidConfig = true;
+                    return;
+                }
+
+                xrOrigin.CameraYOffset = height;
+            }
+            catch
             {
                 tv.text
                     = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nInvalid Height";
                 invalidConfig = true;
                 return;
             }
-            xrCameraOffset.position = xrCameraOffset.position.SetY(height);
             try
             {
                 participantName = lines[4].Split(':')[1].Trim();
             }
             catch
             {
-                Debug.LogWarning("No name provided");
+                if(enableConsoleDebugging) Debug.LogWarning("No name provided");
             }
 
             string dateTime = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss");
@@ -223,7 +237,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 
         isBlockActive = true;
         trial = 1;
-        Debug.Log($"Block Started: {block}");
+        if(enableConsoleDebugging) Debug.Log($"Block Started: {block}");
         StartTrial();
     }
 
@@ -244,7 +258,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
         startTime = DateTime.Now.ToString("HH:mm:ss.fff");
         isTrialActive = true;
         tv.text = motorImageryMessage;
-        Debug.Log($"Trial Started: {trial}");
+        if(enableConsoleDebugging) Debug.Log($"Trial Started: {trial}");
         blockTrailIndicator.text = $"{block} {trial}";
     }
 
@@ -269,7 +283,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 
         currentType = targetTrial.Type;
         tv.text = golfMessage;
-        Debug.Log("Ball Fired");
+        if(enableConsoleDebugging) Debug.Log("Ball Fired");
         ballFireTime = DateTime.Now.AddSeconds(controller.Phaser.AnimTime).ToString("HH:mm:ss.fff");
         isBallMoving = true;
     }
@@ -284,7 +298,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 
         controller.OnBallStop.RemoveListener(StopBall);
         ballStopTime = DateTime.Now.AddSeconds(-controller.Phaser.AnimTime).ToString("HH:mm:ss.fff");
-        Debug.Log("Ball Stopped");
+        if(enableConsoleDebugging) Debug.Log("Ball Stopped");
         isBallMoving = false;
         EndTrial(Vector3.Distance(controller.transform.position, controller.HoleTransform.position));
     }
@@ -293,7 +307,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     {
         yield return new WaitForSeconds(time);
         ballStopTime = DateTime.Now.ToString("HH:mm:ss.fff");
-        Debug.Log("Ball Stopped");
+        if(enableConsoleDebugging) Debug.Log("Ball Stopped");
         isBallMoving = false;
         EndTrial(-1f);
     }
@@ -307,7 +321,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
         }
 
         endTime = DateTime.Now.ToString("HH:mm:ss.fff");
-        Debug.Log($"Trial Ended: {trial}");
+        if(enableConsoleDebugging) Debug.Log($"Trial Ended: {trial}");
         if (currentType == ConditionType.Perfect) radialError = 0f;
         else if (currentType == ConditionType.Control) radialError = -1f;
         LogData(radialError);
@@ -334,12 +348,12 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
         }
 
         isBlockActive = false;
-        Debug.Log($"Block Ended: {block}");
+        if(enableConsoleDebugging) Debug.Log($"Block Ended: {block}");
         block++;
         if (allBlocks.Count < block)
         {
             tv.text = thanksMessage;
-            Debug.Log($"Experiment Ended");
+            if(enableConsoleDebugging) Debug.Log($"Experiment Ended");
             experimentEnd = true;
         }
         else
@@ -354,7 +368,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
         string logEntry =
             $"{pid},{condition},{session},{block},{trial},False,{startTime},{ballFireTime},{ballStopTime},{endTime},{radialErrorString}\n";
         File.AppendAllText(dataFilePath, logEntry);
-        Debug.Log("Logged Data");
+        if(enableConsoleDebugging) Debug.Log("Logged Data");
     }
 
     private void UndoTrial()

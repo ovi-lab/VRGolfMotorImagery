@@ -14,6 +14,7 @@
     "com.unity.xr.interaction.toolkit": "2.5.4",
     "com.unity.xr.management": "4.5.0",
     "com.unity.xr.openxr": "1.11.0",
+    "com.v0lt.editor-attributes": "https://github.com/v0lt13/EditorAttributes.git",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",

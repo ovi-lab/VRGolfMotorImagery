@@ -410,7 +410,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 236231307}
   tv: {fileID: 1450713087}
-  maximumSessionCount: 3
+  maximumSessionCount: 4
   welcomeMessage: Welcome
   welcomeBackMessage: Welcome Back
   motorImageryMessage: 'Please perform Motor Imagery
@@ -444,17 +444,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockCount: 15
   trialCountPerBlock: 6
-  percentageError: 30
   minErroneousTrialsPerBlock: 1
   maxErroneousTrialsPerBlock: 5
   minTime: 6
   maxTime: 8
   holeTransform: {fileID: 1650509753}
-  errorRadii:
-  - 0.12
-  - 0.24
-  - 0.36
-  meanRadialError: 0.6
+  errors:
+  - StartRadius: 0
+    EndRadius: 0.12
+    Count: 10
+  - StartRadius: 0.12
+    EndRadius: 0.24
+    Count: 10
+  - StartRadius: 0.24
+    EndRadius: 0.36
+    Count: 10
 --- !u!1 &40850374
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EditorAttributes;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -8,7 +9,6 @@ public class ConditionManager : MonoBehaviour
     [Header("Experiment Settings")]
     [SerializeField] private int blockCount;
     [SerializeField] private int trialCountPerBlock;
-    [Range(0, 100), SerializeField] private float percentageError;
     [SerializeField] private int minErroneousTrialsPerBlock;
     [SerializeField] private int maxErroneousTrialsPerBlock;
 
@@ -20,13 +20,11 @@ public class ConditionManager : MonoBehaviour
     [SerializeField] private Transform holeTransform;
 
     [Header("Random Condition Settings")]
-    [Range(0, 180),SerializeField] private float maxErrorAngle;
-    [SerializeField] private float minErrorDistance;
-    [SerializeField] private float maxErrorDistance;
-    [SerializeField] private float meanRadialError;
+    [SerializeField, DataTable] private List<ErrorRadiusWithCount> errors;
 
-    private List<Vector3> errorPositions = new List<Vector3>();
+    private int totalErrorCount;
     private List<Block> allBlocks = new List<Block>();
+    private const float HOLE_RADIUS = 0.055f;
 
     public List<Block> GenerateBlocks(char condition)
     {
@@ -82,11 +80,9 @@ public class ConditionManager : MonoBehaviour
 
     private void GenerateRandomCondition()
     {
-        int totalTrialCount = blockCount * trialCountPerBlock;
-        int errorTrialCount = (int)(totalTrialCount * percentageError * 0.01f);
-        GenerateErrorPositions(errorTrialCount);
+        List<Vector3> errorPositions = GenerateErrorPositions();
 
-        List<int> errorDistribution = DistributeErrorsAcrossBlocks(errorTrialCount, blockCount, minErroneousTrialsPerBlock, maxErroneousTrialsPerBlock);
+        List<int> errorDistribution = DistributeErrorsAcrossBlocks(errorPositions.Count, minErroneousTrialsPerBlock, maxErroneousTrialsPerBlock);
 
         for (int i = 0; i < blockCount; i++)
         {
@@ -115,11 +111,9 @@ public class ConditionManager : MonoBehaviour
             block.Trials = trials;
             allBlocks.Add(block);
         }
-
-        //ValidateDistribution();
     }
 
-    private List<int> DistributeErrorsAcrossBlocks(int totalErrors, int blockCount, int minPerBlock, int maxPerBlock)
+    private List<int> DistributeErrorsAcrossBlocks(int totalErrors, int minPerBlock, int maxPerBlock)
     {
         List<int> distribution = new List<int>(new int[blockCount]);
 
@@ -144,78 +138,67 @@ public class ConditionManager : MonoBehaviour
         return distribution;
     }
 
-    private void ValidateDistribution()
+    private List<Vector3> GenerateErrorPositions()
     {
-
-        int totalErrors = 0;
-        float totalRadialError = 0;
-        bool failed = false;
-
-        foreach (Block block in allBlocks)
+        List<Vector3> errorPositions = new List<Vector3>();
+        foreach (ErrorRadiusWithCount error in errors)
         {
-            int blockErrorCount = 0;
-            foreach (Trial trial in block.Trials)
+            for (int i = 0; i < error.Count; i++)
             {
-                if (trial.Type == ConditionType.Error)
-                {
-                    blockErrorCount++;
-                    totalErrors++;
-                    totalRadialError += Vector3.Distance(trial.TargetPosition, holeTransform.position);
-                }
-            }
-
-            if (blockErrorCount < minErroneousTrialsPerBlock || blockErrorCount > maxErroneousTrialsPerBlock)
-            {
-                Debug.LogError($"Min Errors: {minErroneousTrialsPerBlock}; Max Errors: {maxErroneousTrialsPerBlock}; Block Error: {blockErrorCount}");
-                failed = true;
-                break;
+                float errorRadius = Random.Range(error.StartRadius, error.EndRadius);
+                float errorAngle = Random.Range(-175f, 175f);
+                Vector3 errorPosition = holeTransform.position +
+                                        Quaternion.AngleAxis(errorAngle, transform.up) * transform.forward *
+                                        errorRadius;
+                errorPositions.Add(errorPosition);
             }
         }
-
-        Debug.Log($"Average radial error {totalRadialError/totalErrors}");
-        Debug.Log($"Expected average radial error {meanRadialError}");
-        Debug.Log($"Total Error Trials: {totalErrors}");
-        Debug.Log($"Expected Error Trials: {(int)(blockCount * trialCountPerBlock * percentageError * 0.01f)}");
-        if (failed)
-        {
-            Debug.LogError("Block error count constraints failed");
-        }
-        else
-        {
-            Debug.Log("Minimum and maximum errors per block were satisfied!");
-        }
-    }
-
-    private void GenerateErrorPositions(int errorTrialCount)
-    {
-        List<float> radialErrors = RandomValueGenerator.GenerateValues(errorTrialCount, meanRadialError, minErrorDistance, meanRadialError);
-        foreach (float radialError in radialErrors)
-        {
-            float randomAngle = Random.Range(-maxErrorAngle, maxErrorAngle);
-            Vector3 errorPosition = holeTransform.position + Quaternion.AngleAxis(randomAngle, transform.up) * transform.forward * radialError;
-            errorPositions.Add(errorPosition);
-        }
+        return errorPositions;
     }
 
     void OnDrawGizmos()
     {
-        Vector3 forward = holeTransform.forward * maxErrorDistance;
-        Vector3 leftBoundary = Quaternion.Euler(0, -maxErrorAngle, 0) * forward;
-        Vector3 rightBoundary = Quaternion.Euler(0, maxErrorAngle, 0) * forward;
-
         Gizmos.color = Color.red;
+        Vector3 center = holeTransform.position;
+        int segments = 250;
+        List<ErrorRadiusWithCount> errorsWithBase = new List<ErrorRadiusWithCount>(errors);
+        errorsWithBase.Insert(0, new ErrorRadiusWithCount(0, 0, 0));
+        foreach (ErrorRadiusWithCount error in errorsWithBase)
+        {
+            for (int i = 0; i < segments; i++)
+            {
+                float angle = (i / (float)segments) * Mathf.PI * 2;
+                float nextAngle = ((i + 1) / (float)segments) * Mathf.PI * 2;
 
-        Gizmos.DrawWireSphere(holeTransform.position, maxErrorDistance);
-        Gizmos.DrawLine(holeTransform.position, holeTransform.position + leftBoundary);
-        Gizmos.DrawLine(holeTransform.position, holeTransform.position + rightBoundary);
+                Vector3 point = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * (error.EndRadius + HOLE_RADIUS) + new Vector3(center.x, center.y, center.z);
+                Vector3 nextPoint = new Vector3(Mathf.Cos(nextAngle), 0, Mathf.Sin(nextAngle)) * (error.EndRadius + HOLE_RADIUS) + new Vector3(center.x, center.y, center.z);
+
+                Gizmos.DrawLine(point, nextPoint);
+            }
+        }
     }
 
-    public bool ValidateConstraints()
+    // public bool ValidateConstraints()
+    // {
+    //     int blockMinError = blockCount * minErroneousTrialsPerBlock;
+    //     int blockMaxError = blockCount * maxErroneousTrialsPerBlock;
+    //     int expectedErrorCount = (int)(blockCount * trialCountPerBlock * percentageError * 0.01f);
+    //     return expectedErrorCount >= blockMinError && expectedErrorCount <= blockMaxError;
+    // }
+}
+
+[Serializable]
+public class ErrorRadiusWithCount
+{
+    public float StartRadius;
+    public float EndRadius;
+    public int Count;
+
+    public ErrorRadiusWithCount(float startRadius, float endRadius, int count)
     {
-        int blockMinError = blockCount * minErroneousTrialsPerBlock;
-        int blockMaxError = blockCount * maxErroneousTrialsPerBlock;
-        int expectedErrorCount = (int)(blockCount * trialCountPerBlock * percentageError * 0.01f);
-        return expectedErrorCount >= blockMinError && expectedErrorCount <= blockMaxError;
+        StartRadius = startRadius;
+        EndRadius = endRadius;
+        Count = count;
     }
 }
 

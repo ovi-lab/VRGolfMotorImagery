@@ -64,16 +64,36 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
                 Directory.CreateDirectory(configDirectory);
             }
 
-            string configFilePath = Path.Combine(configDirectory, "config.txt");
-            if (!File.Exists(configFilePath))
+            string fileContents = "";
+            string[] textFiles = Directory.GetFiles(configDirectory, "*.txt");
+            if (textFiles.Length == 0)
             {
-                tv.text
-                    = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nConfig File is missing";
+                tv.text = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nConfig File is missing";
                 invalidConfig = true;
                 return;
             }
+            else if (textFiles.Length == 1)
+            {
+                fileContents = File.ReadAllText(textFiles[0]);
+            }
+            else
+            {
+                string configFilePath = textFiles.FirstOrDefault(f =>
+                    Path.GetFileName(f).Equals("config.txt", StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetFileName(f).Equals("config.txt.txt", StringComparison.OrdinalIgnoreCase));
 
-            string fileContents = File.ReadAllText(configFilePath);
+                if (configFilePath != null)
+                {
+                    fileContents = File.ReadAllText(configFilePath);
+                }
+                else
+                {
+                    tv.text = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nMultiple invalid config files";
+                    invalidConfig = true;
+                }
+            }
+
+
 
             string[] lines = fileContents.Split('\n');
             pid = lines[0].Split(':')[1].Trim();

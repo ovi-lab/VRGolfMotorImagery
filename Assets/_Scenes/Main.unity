@@ -372,8 +372,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 31020248}
-  - component: {fileID: 31020250}
   - component: {fileID: 31020249}
+  - component: {fileID: 31020250}
   m_Layer: 0
   m_Name: ExperimentManager
   m_TagString: Untagged
@@ -408,10 +408,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ccbba197534d82a1e2aac42c17385e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controller: {fileID: 236231307}
-  tv: {fileID: 1450713087}
-  xrOrigin: {fileID: 1939296438}
-  blockTrailIndicator: {fileID: 444374908}
   welcomeMessage: Welcome
   welcomeBackMessage: Welcome Back
   motorImageryMessage: 'Please perform motor imagery
@@ -430,7 +426,16 @@ MonoBehaviour:
   maximumSessionCount: 4
   showPrevTrialNumInMessage: 1
   showCurrTrialNumInMessage: 1
-  enableConsoleDebugging: 0
+  enableConsoleDebugging: 1
+  controller: {fileID: 236231307}
+  tv: {fileID: 1450713087}
+  xrOrigin: {fileID: 1939296438}
+  blockTrailIndicator: {fileID: 444374908}
+  enableOverride: 1
+  pidOverride: 004
+  nameOverride: Celine
+  sessionOverride: 1
+  conditionOverride: 114
 --- !u!114 &31020250
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -443,6 +448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63d64e8305da4f04bb1db24c584b6fe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugBlocks: 1
   blockCount: 15
   trialCountPerBlock: 6
   minErroneousTrialsPerBlock: 1
@@ -450,6 +456,7 @@ MonoBehaviour:
   minTime: 6
   maxTime: 8
   holeTransform: {fileID: 1650509753}
+  isRandomConditionInvalid: 0
   errors:
   - StartRadius: 0
     EndRadius: 0.12
@@ -4119,7 +4126,7 @@ Transform:
   m_GameObject: {fileID: 1675823880}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.001600001, y: -0.6499999, z: 0}
+  m_LocalPosition: {x: 0.001600001, y: -0.608, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

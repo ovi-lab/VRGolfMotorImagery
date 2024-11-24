@@ -4,19 +4,16 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using EditorAttributes;
 using TMPro;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Void = EditorAttributes.Void;
 
 [RequireComponent(typeof(ConditionManager))]
 public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 {
-    [Header("References")]
-    [SerializeField] private GolfBallController controller;
-    [SerializeField] private TextMeshProUGUI tv;
-    [SerializeField] private XROrigin xrOrigin;
-    [SerializeField] private TextMeshProUGUI blockTrailIndicator;
     [Header("Messages")]
     [TextArea, SerializeField] private string welcomeMessage;
     [TextArea, SerializeField] private string welcomeBackMessage;
@@ -31,7 +28,19 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     [Range(2, 10), SerializeField] private int maximumSessionCount;
     [SerializeField] private bool showPrevTrialNumInMessage;
     [SerializeField] private bool showCurrTrialNumInMessage;
-    [SerializeField] private bool enableConsoleDebugging = false;
+    [SerializeField] private bool enableConsoleDebugging;
+    [Header("References")]
+    [SerializeField] private GolfBallController controller;
+    [SerializeField] private TextMeshProUGUI tv;
+    [SerializeField] private XROrigin xrOrigin;
+    [SerializeField] private TextMeshProUGUI blockTrailIndicator;
+    [FoldoutGroup("Custom Participant Parameters Override", nameof(enableOverride), nameof(pidOverride), nameof(nameOverride), nameof(sessionOverride), nameof(conditionOverride))]
+    [SerializeField] private Void groupHolder;
+    [SerializeField, HideProperty, Validate("Custom participant override must be disabled for builds!", nameof(enableOverride), buildKiller: true)] private bool enableOverride;
+    [SerializeField, HideProperty] private string pidOverride;
+    [SerializeField, HideProperty] private string nameOverride;
+    [SerializeField, HideProperty] private int sessionOverride;
+    [SerializeField, HideProperty] private char conditionOverride;
 
     private string pid;
     private int session;
@@ -56,6 +65,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     protected override void Awake()
     {
         base.Awake();
+
         try
         {
             string configDirectory = Path.Combine(Application.persistentDataPath, "Config");
@@ -93,14 +103,15 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
                 }
             }
 
-
-
             string[] lines = fileContents.Split('\n');
             pid = lines[0].Split(':')[1].Trim();
+            if (enableOverride) pid = pidOverride;
             session = int.Parse(lines[1].Split(':')[1].Trim());
+            if (enableOverride) session = sessionOverride;
             try
             {
                 condition = char.ToLower(char.Parse(lines[2].Split(':')[1].Trim()));
+                if (enableOverride) condition = char.ToLower(conditionOverride);
             }
             catch
             {
@@ -133,6 +144,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             try
             {
                 participantName = lines[4].Split(':')[1].Trim();
+                if (enableOverride) participantName = nameOverride;
             }
             catch
             {
@@ -167,6 +179,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
                         ? $"{welcomeMessage}\n{participantName}!"
                         : $"{welcomeMessage}!";
                     string validationText = $"\nPlease read this code:\n{pid}-{conditionCode}-{session}";
+                    if(enableConsoleDebugging) Debug.Log($"Participant ID:{pid}, Condition:{condition}, Session:{session}");
                     tv.text = introText + validationText;
                     break;
                 }
@@ -201,7 +214,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             dataFilePath = Path.Combine(participantPath, dataFileName);
             File.WriteAllText(dataFilePath,
                 "pid,condition,session,block,trial,interrupted_trial,start_time,ball_fire_time,ball_stop_time,end_time,radial_error\n");
-            allBlocks = GetComponent<ConditionManager>().GenerateBlocks(condition);
+            allBlocks = GetComponent<ConditionManager>().GenerateBlocks(condition, pid, session);
             receivedAllBlocks = true;
         }
         catch (Exception e)

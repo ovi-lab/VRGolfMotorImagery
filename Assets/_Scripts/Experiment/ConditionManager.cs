@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using EditorAttributes;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using Random = System.Random;
 
 public class ConditionManager : MonoBehaviour
 {
+
+    [SerializeField] private bool debugBlocks;
+
     [Header("Experiment Settings")]
     [SerializeField] private int blockCount;
     [SerializeField] private int trialCountPerBlock;
@@ -20,14 +23,26 @@ public class ConditionManager : MonoBehaviour
     [SerializeField] private Transform holeTransform;
 
     [Header("Random Condition Settings")]
+    [SerializeField, Validate("Invalid Parameters for Random Condition", nameof(isRandomConditionInvalid), buildKiller:true)] private bool isRandomConditionInvalid;
     [SerializeField, DataTable] private List<ErrorRadiusWithCount> errors;
 
     private int totalErrorCount;
     private List<Block> allBlocks = new List<Block>();
     private const float HOLE_RADIUS = 0.055f;
+    private Random random;
 
-    public List<Block> GenerateBlocks(char condition)
+    public List<Block> GenerateBlocks(char condition, string pid, int session)
     {
+        if (isRandomConditionInvalid) return null;
+
+        if (!int.TryParse(pid, out int pidVal))
+        {
+            pidVal = 0;
+        }
+
+        int seed = condition + session + pidVal;
+        random = new Random(seed);
+
         switch (condition)
         {
             case 'c':
@@ -42,6 +57,22 @@ public class ConditionManager : MonoBehaviour
             default:
                 throw new Exception("Not a valid condition type");
         }
+    }
+
+    private void OnValidate()
+    {
+        int totalErrorsAcrossBlocks = 0;
+        foreach (ErrorRadiusWithCount error in errors)
+        {
+            totalErrorsAcrossBlocks += error.Count;
+        }
+
+        if (minErroneousTrialsPerBlock * blockCount > totalErrorsAcrossBlocks ||
+            maxErroneousTrialsPerBlock * blockCount < totalErrorsAcrossBlocks)
+        {
+            isRandomConditionInvalid = true;
+        }
+        else isRandomConditionInvalid = false;
     }
 
     private void GenerateControlCondition()
@@ -59,6 +90,7 @@ public class ConditionManager : MonoBehaviour
             }
             allBlocks.Add(block);
         }
+        if(debugBlocks) PrintAllTrials();
     }
 
     private void GeneratePerfectCondition()
@@ -76,6 +108,7 @@ public class ConditionManager : MonoBehaviour
             }
             allBlocks.Add(block);
         }
+        if(debugBlocks) PrintAllTrials();
     }
 
     private void GenerateRandomCondition()
@@ -107,10 +140,39 @@ public class ConditionManager : MonoBehaviour
                 }
                 trials.Add(trial);
             }
-            trials.Shuffle();
+            trials.Shuffle(random);
             block.Trials = trials;
             allBlocks.Add(block);
         }
+        if(debugBlocks) PrintAllTrials();
+    }
+
+    private void PrintAllTrials()
+    {
+        string allTrialStr = "";
+        int i = 1;
+        foreach (Block block in allBlocks)
+        {
+            string blockStr = $"Block{i}\n||";
+            foreach (Trial trial in block.Trials)
+            {
+                string color = trial.Type switch
+                {
+                    ConditionType.Perfect => "#75FF8C", ConditionType.Error => "#FF8D75", ConditionType.Control => "#9485FF"
+                    , _ => throw new ArgumentOutOfRangeException()
+                };
+                string type = trial.Type switch
+                {
+                    ConditionType.Control => "C", ConditionType.Perfect => "P", ConditionType.Error => "E"
+                    , _ => throw new ArgumentOutOfRangeException()
+                };
+                blockStr += $"<color={color}>Type:{type};Dist:{Vector3.Distance(trial.TargetPosition, holeTransform.position):0.00}</color>||";
+            }
+            allTrialStr += blockStr + "\n";
+            i++;
+        }
+
+        Debug.Log(allTrialStr);
     }
 
     private List<int> DistributeErrorsAcrossBlocks(int totalErrors, int minPerBlock, int maxPerBlock)
@@ -127,7 +189,8 @@ public class ConditionManager : MonoBehaviour
         {
             for (int i = 0; i < blockCount && totalErrors > 0; i++)
             {
-                if (distribution[i] < maxPerBlock)
+                if (distribution[i] >= maxPerBlock) continue;
+                if (random.Next(1, 7) == 1)
                 {
                     distribution[i]++;
                     totalErrors--;
@@ -145,8 +208,8 @@ public class ConditionManager : MonoBehaviour
         {
             for (int i = 0; i < error.Count; i++)
             {
-                float errorRadius = Random.Range(error.StartRadius, error.EndRadius);
-                float errorAngle = Random.Range(-175f, 175f);
+                float errorRadius = random.NextFloat(error.StartRadius, error.EndRadius);
+                float errorAngle = random.NextFloat(-175f, 175f);
                 Vector3 errorPosition = holeTransform.position +
                                         Quaternion.AngleAxis(errorAngle, transform.up) * transform.forward *
                                         errorRadius;

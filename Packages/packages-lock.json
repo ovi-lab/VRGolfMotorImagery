@@ -239,13 +239,13 @@
       "url": "https://packages.unity.com"
     },
     "com.v0lt.editor-attributes": {
-      "version": "https://github.com/GAmuzak/EditorAttributes.git",
+      "version": "https://github.com/v0lt13/EditorAttributes.git",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       },
-      "hash": "9b5c5d87f20656603254bbf64431175805965865"
+      "hash": "71969f809590302d0f653d88d3d029147e078e5b"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

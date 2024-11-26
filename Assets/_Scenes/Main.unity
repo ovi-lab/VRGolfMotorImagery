@@ -431,7 +431,7 @@ MonoBehaviour:
   tv: {fileID: 1450713087}
   xrOrigin: {fileID: 1939296438}
   blockTrailIndicator: {fileID: 444374908}
-  enableOverride: 1
+  enableOverride: 0
   randomizeSeed: 0
   pidOverride: 004
   sessionOverride: 1
@@ -3460,9 +3460,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Welcome Back
-
-    Celine'
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3489,7 +3487,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.35
+  m_fontSize: 36
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

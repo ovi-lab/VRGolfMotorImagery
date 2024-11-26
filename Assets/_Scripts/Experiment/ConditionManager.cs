@@ -218,7 +218,7 @@ public class ConditionManager : MonoBehaviour
         }
         return errorPositions;
     }
-
+#if UNITY_EDITOR
     void OnDrawGizmos()
     {
         Handles.color = Color.red; // Set line color
@@ -247,6 +247,7 @@ public class ConditionManager : MonoBehaviour
             colIdx++;
         }
     }
+#endif
 }
 
 [Serializable]

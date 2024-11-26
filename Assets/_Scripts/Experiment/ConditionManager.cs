@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using EditorAttributes;
+using UnityEditor;
 using UnityEngine;
 using Random = System.Random;
 
 public class ConditionManager : MonoBehaviour
 {
-
     [SerializeField] private bool debugBlocks;
 
     [Header("Experiment Settings")]
     [SerializeField] private int blockCount;
     [SerializeField] private int trialCountPerBlock;
     [SerializeField] private int minErroneousTrialsPerBlock;
+    [Validate("Invalid Parameters for Random Condition", nameof(isRandomConditionInvalid), buildKiller:true)]
     [SerializeField] private int maxErroneousTrialsPerBlock;
 
     [Header("Control Condition Settings")]
@@ -23,15 +24,15 @@ public class ConditionManager : MonoBehaviour
     [SerializeField] private Transform holeTransform;
 
     [Header("Random Condition Settings")]
-    [SerializeField, Validate("Invalid Parameters for Random Condition", nameof(isRandomConditionInvalid), buildKiller:true)] private bool isRandomConditionInvalid;
     [SerializeField, DataTable] private List<ErrorRadiusWithCount> errors;
 
     private int totalErrorCount;
     private List<Block> allBlocks = new List<Block>();
-    private const float HOLE_RADIUS = 0.055f;
+    private const float HOLE_RADIUS = 0.055f; // adding 1cm of padding to prevent the ball from accidentally falling in
     private Random random;
+    private bool isRandomConditionInvalid;
 
-    public List<Block> GenerateBlocks(char condition, string pid, int session)
+    public List<Block> GenerateBlocks(char condition, string pid, int session, bool randomizeSeed = false)
     {
         if (isRandomConditionInvalid) return null;
 
@@ -41,7 +42,7 @@ public class ConditionManager : MonoBehaviour
         }
 
         int seed = condition + session + pidVal;
-        random = new Random(seed);
+        random = randomizeSeed ? new Random(): new Random(seed);
 
         switch (condition)
         {
@@ -208,7 +209,7 @@ public class ConditionManager : MonoBehaviour
         {
             for (int i = 0; i < error.Count; i++)
             {
-                float errorRadius = random.NextFloat(error.StartRadius, error.EndRadius);
+                float errorRadius = random.NextFloat(error.StartRadius + HOLE_RADIUS, error.EndRadius + HOLE_RADIUS);
                 float errorAngle = random.NextFloat(-175f, 175f);
                 Vector3 errorPosition = holeTransform.position +
                                         Quaternion.AngleAxis(errorAngle, transform.up) * transform.forward *
@@ -221,23 +222,30 @@ public class ConditionManager : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
+        Handles.color = Color.red; // Set line color
         Vector3 center = holeTransform.position;
         int segments = 250;
         List<ErrorRadiusWithCount> errorsWithBase = new List<ErrorRadiusWithCount>(errors);
         errorsWithBase.Insert(0, new ErrorRadiusWithCount(0, 0, 0));
+        List<Color> colors = new List<Color> { Color.black, Color.red, Color.magenta, Color.blue };
+        int colIdx = 0;
         foreach (ErrorRadiusWithCount error in errorsWithBase)
         {
-            for (int i = 0; i < segments; i++)
+            Handles.color = colors[colIdx];
+            Vector3[] ringPoints = new Vector3[segments + 1];
+            for (int i = 0; i <= segments; i++)
             {
                 float angle = (i / (float)segments) * Mathf.PI * 2;
-                float nextAngle = ((i + 1) / (float)segments) * Mathf.PI * 2;
-
-                Vector3 point = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * (error.EndRadius + HOLE_RADIUS) + new Vector3(center.x, center.y, center.z);
-                Vector3 nextPoint = new Vector3(Mathf.Cos(nextAngle), 0, Mathf.Sin(nextAngle)) * (error.EndRadius + HOLE_RADIUS) + new Vector3(center.x, center.y, center.z);
-
-                Gizmos.DrawLine(point, nextPoint);
+                ringPoints[i] = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * (error.StartRadius + HOLE_RADIUS) + center;
             }
+            Handles.DrawAAPolyLine(7, ringPoints);
+            for (int i = 0; i <= segments; i++) // Close the loop by repeating the first point
+            {
+                float angle = (i / (float)segments) * Mathf.PI * 2;
+                ringPoints[i] = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * (error.EndRadius + HOLE_RADIUS) + center;
+            }
+            Handles.DrawAAPolyLine(7, ringPoints);
+            colIdx++;
         }
     }
 }

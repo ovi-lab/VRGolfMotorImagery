@@ -24,23 +24,28 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     [TextArea, SerializeField] private string canceledPreviousTrial;
     [TextArea, SerializeField] private string canceledCurrentTrial;
     [TextArea, SerializeField] private string thanksMessage;
+
     [Header("Additional Parameters")]
     [Range(2, 10), SerializeField] private int maximumSessionCount;
     [SerializeField] private bool showPrevTrialNumInMessage;
     [SerializeField] private bool showCurrTrialNumInMessage;
     [SerializeField] private bool enableConsoleDebugging;
+
     [Header("References")]
     [SerializeField] private GolfBallController controller;
     [SerializeField] private TextMeshProUGUI tv;
     [SerializeField] private XROrigin xrOrigin;
     [SerializeField] private TextMeshProUGUI blockTrailIndicator;
-    [FoldoutGroup("Custom Participant Parameters Override", nameof(enableOverride), nameof(pidOverride), nameof(nameOverride), nameof(sessionOverride), nameof(conditionOverride))]
+
+    [FoldoutGroup("Custom Participant Parameters Override", nameof(enableOverride), nameof(randomizeSeed), nameof(pidOverride), nameof(sessionOverride), nameof(conditionOverride), nameof(nameOverride), nameof(heightOverride))]
     [SerializeField] private Void groupHolder;
     [SerializeField, HideProperty, Validate("Custom participant override must be disabled for builds!", nameof(enableOverride), buildKiller: true)] private bool enableOverride;
-    [SerializeField, HideProperty] private string pidOverride;
-    [SerializeField, HideProperty] private string nameOverride;
-    [SerializeField, HideProperty] private int sessionOverride;
-    [SerializeField, HideProperty] private char conditionOverride;
+    [SerializeField, HideProperty, EnableField(nameof(enableOverride))] private bool randomizeSeed;
+    [SerializeField, HideProperty, EnableField(nameof(enableOverride)), DisableField(nameof(randomizeSeed))] private string pidOverride;
+    [SerializeField, HideProperty, EnableField(nameof(enableOverride)), DisableField(nameof(randomizeSeed))] private int sessionOverride;
+    [SerializeField, HideProperty, EnableField(nameof(enableOverride)), DisableField(nameof(randomizeSeed))] private char conditionOverride;
+    [SerializeField, HideProperty, EnableField(nameof(enableOverride)), DisableField(nameof(randomizeSeed)), Prefix("[Optional]")] private string nameOverride;
+    [SerializeField, HideProperty, EnableField(nameof(enableOverride)), DisableField(nameof(randomizeSeed)), Prefix("[Optional]")] private float heightOverride;
 
     private string pid;
     private int session;
@@ -214,7 +219,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             dataFilePath = Path.Combine(participantPath, dataFileName);
             File.WriteAllText(dataFilePath,
                 "pid,condition,session,block,trial,interrupted_trial,start_time,ball_fire_time,ball_stop_time,end_time,radial_error\n");
-            allBlocks = GetComponent<ConditionManager>().GenerateBlocks(condition, pid, session);
+            allBlocks = GetComponent<ConditionManager>().GenerateBlocks(condition, pid, session, randomizeSeed);
             receivedAllBlocks = true;
         }
         catch (Exception e)
@@ -236,6 +241,11 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     {
         InputHandler.Instance.OnTriggerPull -= HandleInput;
         InputHandler.Instance.OnCancelTrial -= HandleUndo;
+    }
+
+    private void OnValidate()
+    {
+        if (!enableOverride) randomizeSeed = false;
     }
 
     private void HandleInput()
@@ -313,10 +323,10 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             controller.FireBall(targetTrial.TargetPosition);
             controller.OnBallStop.AddListener(StopBall);
         }
-
         currentType = targetTrial.Type;
         tv.text = golfMessage;
-        if(enableConsoleDebugging) Debug.Log("Ball Fired");
+        if(enableConsoleDebugging) Debug.Log("Ball Created!");
+        if(enableConsoleDebugging) StartCoroutine(InvokeAfterDelay(() => { Debug.Log("Ball Fired!"); }, controller.Phaser.AnimTime));
         ballFireTime = DateTime.Now.AddSeconds(controller.Phaser.AnimTime).ToString("HH:mm:ss.fff");
         isBallMoving = true;
     }
@@ -331,7 +341,8 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 
         controller.OnBallStop.RemoveListener(StopBall);
         ballStopTime = DateTime.Now.AddSeconds(-controller.Phaser.AnimTime).ToString("HH:mm:ss.fff");
-        if(enableConsoleDebugging) Debug.Log("Ball Stopped");
+        if(enableConsoleDebugging) Debug.Log("Ball Stopped!");
+        if(enableConsoleDebugging) StartCoroutine(InvokeAfterDelay(() => { Debug.Log("Ball Disappeared!"); }, controller.Phaser.AnimTime));
         isBallMoving = false;
         EndTrial(Vector3.Distance(controller.transform.position, controller.HoleTransform.position));
     }
@@ -402,6 +413,8 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             $"{pid},{condition},{session},{block},{trial},False,{startTime},{ballFireTime},{ballStopTime},{endTime},{radialErrorString}\n";
         File.AppendAllText(dataFilePath, logEntry);
         if(enableConsoleDebugging) Debug.Log("Logged Data");
+        if(enableConsoleDebugging) Debug.Log($"Radial Error: {radialError}");
+        if(enableConsoleDebugging) Debug.Log($"Actual Distance: {Vector3.Distance(controller.transform.position, controller.HoleTransform.position)}");
     }
 
     private void UndoTrial()
@@ -473,5 +486,11 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             tv.text = showPrevTrialNumInMessage ? $"{block}:{trial}\n" + canceledPreviousTrial : canceledPreviousTrial;
         }
         isTrialActive = false;
+    }
+
+    private IEnumerator InvokeAfterDelay(Action action, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        action?.Invoke();
     }
 }

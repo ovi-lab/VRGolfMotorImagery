@@ -431,11 +431,13 @@ MonoBehaviour:
   tv: {fileID: 1450713087}
   xrOrigin: {fileID: 1939296438}
   blockTrailIndicator: {fileID: 444374908}
-  enableOverride: 0
+  enableOverride: 1
+  randomizeSeed: 0
   pidOverride: 004
-  nameOverride: Celine
   sessionOverride: 1
   conditionOverride: 114
+  nameOverride: Rishav
+  heightOverride: 1.54
 --- !u!114 &31020250
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -456,16 +458,15 @@ MonoBehaviour:
   minTime: 6
   maxTime: 8
   holeTransform: {fileID: 1650509753}
-  isRandomConditionInvalid: 0
   errors:
-  - StartRadius: 0
-    EndRadius: 0.12
+  - StartRadius: 0.01
+    EndRadius: 0.11
     Count: 10
-  - StartRadius: 0.12
-    EndRadius: 0.24
+  - StartRadius: 0.13
+    EndRadius: 0.23
     Count: 10
-  - StartRadius: 0.24
-    EndRadius: 0.36
+  - StartRadius: 0.25
+    EndRadius: 0.35
     Count: 10
 --- !u!1 &40850374
 GameObject:
@@ -4486,7 +4487,7 @@ Transform:
   m_GameObject: {fileID: 1939296436}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: -0.0522, y: 0.183, z: -3.038}
+  m_LocalPosition: {x: 0.123, y: 0.183, z: -3.006}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -40,10 +39,11 @@ public class GolfBallController : MonoBehaviour
         if (!isMoving) return;
         Vector3 direction = (targetPosition - transform.position).normalized;
         float distance = Vector3.Distance(transform.position, targetPosition);
-        if(distance > 0.01f)
+        if(distance > 0.01f && (rb.velocity.magnitude > 0.02f || distance > 1f))
         {
-            float easingFactor = 1 - Mathf.Exp(-distance * 0.3f);
+            float easingFactor = 1 - Mathf.Exp(-distance * 0.22f);
             rb.velocity = (direction * (easingFactor * maxSpeed)).XZPlane(-1.2f); //hack to make falling look realistic
+            // Debug.Log($"==={distance}==={rb.velocity.magnitude}===");
         }
         else
         {
@@ -52,7 +52,6 @@ public class GolfBallController : MonoBehaviour
             phaser.PhaseOut();
             StartCoroutine(EndAnimTime(phaser.AnimTime));
         }
-
     }
 
     public void FireBall(Vector3 position)
@@ -82,12 +81,12 @@ public class GolfBallController : MonoBehaviour
         isMoving = true;
     }
 
-    // private void OnDrawGizmos()
-    // {
-    //     if (!isMoving) return;
-    //     Gizmos.color = Color.blue;
-    //     Gizmos.DrawWireSphere(targetPosition, 0.08f);
-    // }
+    private void OnDrawGizmos()
+    {
+        if (!isMoving) return;
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(targetPosition, 0.08f);
+    }
 
     public void ResetBall()
     {

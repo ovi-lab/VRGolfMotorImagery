@@ -70,7 +70,6 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     protected override void Awake()
     {
         base.Awake();
-
         try
         {
             string configDirectory = Path.Combine(Application.persistentDataPath, "Config");
@@ -219,7 +218,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             dataFilePath = Path.Combine(participantPath, dataFileName);
             File.WriteAllText(dataFilePath,
                 "pid,condition,session,block,trial,interrupted_trial,start_time,ball_fire_time,ball_stop_time,end_time,radial_error\n");
-            allBlocks = GetComponent<ConditionManager>().GenerateBlocks(condition, pid, session, randomizeSeed);
+            allBlocks = GetComponent<ConditionManager>().GenerateBlocks(condition, pid, session, enableOverride, randomizeSeed);
             receivedAllBlocks = true;
         }
         catch (Exception e)
@@ -246,6 +245,11 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     private void OnValidate()
     {
         if (!enableOverride) randomizeSeed = false;
+    }
+
+    private void PrintAllBlocks()
+    {
+
     }
 
     private void HandleInput()

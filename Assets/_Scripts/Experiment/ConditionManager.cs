@@ -7,8 +7,6 @@ using Random = System.Random;
 
 public class ConditionManager : MonoBehaviour
 {
-    [SerializeField] private bool debugBlocks;
-
     [Header("Experiment Settings")]
     [SerializeField] private int blockCount;
     [SerializeField] private int trialCountPerBlock;
@@ -31,11 +29,12 @@ public class ConditionManager : MonoBehaviour
     private const float HOLE_RADIUS = 0.055f; // adding 1cm of padding to prevent the ball from accidentally falling in
     private Random random;
     private bool isRandomConditionInvalid;
+    private bool customParticipantOverride;
 
-    public List<Block> GenerateBlocks(char condition, string pid, int session, bool randomizeSeed = false)
+    public List<Block> GenerateBlocks(char condition, string pid, int session, bool enableOverride = false , bool randomizeSeed = false)
     {
         if (isRandomConditionInvalid) return null;
-
+        customParticipantOverride = enableOverride;
         if (!int.TryParse(pid, out int pidVal))
         {
             pidVal = 0;
@@ -91,7 +90,7 @@ public class ConditionManager : MonoBehaviour
             }
             allBlocks.Add(block);
         }
-        if(debugBlocks) PrintAllTrials();
+        if(customParticipantOverride) PrintAllTrials();
     }
 
     private void GeneratePerfectCondition()
@@ -109,7 +108,7 @@ public class ConditionManager : MonoBehaviour
             }
             allBlocks.Add(block);
         }
-        if(debugBlocks) PrintAllTrials();
+        if(customParticipantOverride) PrintAllTrials();
     }
 
     private void GenerateRandomCondition()
@@ -145,7 +144,7 @@ public class ConditionManager : MonoBehaviour
             block.Trials = trials;
             allBlocks.Add(block);
         }
-        if(debugBlocks) PrintAllTrials();
+        if(customParticipantOverride) PrintAllTrials();
     }
 
     private void PrintAllTrials()

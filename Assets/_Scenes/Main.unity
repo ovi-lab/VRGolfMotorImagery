@@ -450,7 +450,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63d64e8305da4f04bb1db24c584b6fe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugBlocks: 1
   blockCount: 15
   trialCountPerBlock: 6
   minErroneousTrialsPerBlock: 1

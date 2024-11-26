@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using EditorAttributes;
 using UnityEditor;
 using UnityEngine;
@@ -26,7 +27,7 @@ public class ConditionManager : MonoBehaviour
 
     private int totalErrorCount;
     private List<Block> allBlocks = new List<Block>();
-    private const float HOLE_RADIUS = 0.055f; // adding 1cm of padding to prevent the ball from accidentally falling in
+    private const float HOLE_RADIUS = 0.055f;
     private Random random;
     private bool isRandomConditionInvalid;
     private bool customParticipantOverride;
@@ -156,11 +157,28 @@ public class ConditionManager : MonoBehaviour
             string blockStr = $"Block{i}\n||";
             foreach (Trial trial in block.Trials)
             {
-                string color = trial.Type switch
+                string color = "";
+                switch (trial.Type)
                 {
-                    ConditionType.Perfect => "#75FF8C", ConditionType.Error => "#FF8D75", ConditionType.Control => "#9485FF"
-                    , _ => throw new ArgumentOutOfRangeException()
-                };
+                    case ConditionType.Control:
+                        color = "#d1d1d1";
+                        break;
+                    case ConditionType.Perfect:
+                        color = "#ffffff";
+                        break;
+                    case ConditionType.Error:
+                        // color = "#FF8D75";
+                        float trialDistance = Vector3.Distance(trial.TargetPosition, holeTransform.position) - HOLE_RADIUS;
+                        foreach (ErrorRadiusWithCount error in errors.Where(error => trialDistance >= error.StartRadius && trialDistance <= error.EndRadius))
+                        {
+                            color = "#" + ColorUtility.ToHtmlStringRGB(error.DebugConsoleColor);
+                            break;
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
                 string type = trial.Type switch
                 {
                     ConditionType.Control => "C", ConditionType.Perfect => "P", ConditionType.Error => "E"
@@ -216,6 +234,7 @@ public class ConditionManager : MonoBehaviour
                 errorPositions.Add(errorPosition);
             }
         }
+        errorPositions.Shuffle(random);
         return errorPositions;
     }
 #if UNITY_EDITOR
@@ -225,12 +244,11 @@ public class ConditionManager : MonoBehaviour
         Vector3 center = holeTransform.position;
         int segments = 250;
         List<ErrorRadiusWithCount> errorsWithBase = new List<ErrorRadiusWithCount>(errors);
-        errorsWithBase.Insert(0, new ErrorRadiusWithCount(0, 0, 0));
-        List<Color> colors = new List<Color> { Color.black, Color.red, Color.magenta, Color.blue };
+        errorsWithBase.Insert(0, new ErrorRadiusWithCount(0, 0, 0, Color.black));
         int colIdx = 0;
         foreach (ErrorRadiusWithCount error in errorsWithBase)
         {
-            Handles.color = colors[colIdx];
+            Handles.color = error.DebugConsoleColor;
             Vector3[] ringPoints = new Vector3[segments + 1];
             for (int i = 0; i <= segments; i++)
             {
@@ -256,12 +274,14 @@ public class ErrorRadiusWithCount
     public float StartRadius;
     public float EndRadius;
     public int Count;
+    public Color DebugConsoleColor;
 
-    public ErrorRadiusWithCount(float startRadius, float endRadius, int count)
+    public ErrorRadiusWithCount(float startRadius, float endRadius, int count, Color debugConsoleColor)
     {
         StartRadius = startRadius;
         EndRadius = endRadius;
         Count = count;
+        DebugConsoleColor = debugConsoleColor;
     }
 }
 

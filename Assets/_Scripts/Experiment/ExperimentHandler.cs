@@ -72,50 +72,58 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
         base.Awake();
         try
         {
-            string configDirectory = Path.Combine(Application.persistentDataPath, "Config");
-            if (!Directory.Exists(configDirectory))
+            string[] lines = new string[5];
+            if(!enableOverride)
             {
-                Directory.CreateDirectory(configDirectory);
-            }
-
-            string fileContents = "";
-            string[] textFiles = Directory.GetFiles(configDirectory, "*.txt");
-            if (textFiles.Length == 0)
-            {
-                tv.text = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nConfig File is missing";
-                invalidConfig = true;
-                return;
-            }
-            else if (textFiles.Length == 1)
-            {
-                fileContents = File.ReadAllText(textFiles[0]);
-            }
-            else
-            {
-                string configFilePath = textFiles.FirstOrDefault(f =>
-                    Path.GetFileName(f).Equals("config.txt", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetFileName(f).Equals("config.txt.txt", StringComparison.OrdinalIgnoreCase));
-
-                if (configFilePath != null)
+                string configDirectory = Path.Combine(Application.persistentDataPath, "Config");
+                if (!Directory.Exists(configDirectory))
                 {
-                    fileContents = File.ReadAllText(configFilePath);
+                    Directory.CreateDirectory(configDirectory);
+                }
+
+                string fileContents = "";
+                string[] textFiles = Directory.GetFiles(configDirectory, "*.txt");
+                if (textFiles.Length == 0)
+                {
+                    tv.text =
+                        "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nConfig File is missing";
+                    invalidConfig = true;
+                    return;
+                }
+                else if (textFiles.Length == 1)
+                {
+                    fileContents = File.ReadAllText(textFiles[0]);
                 }
                 else
                 {
-                    tv.text = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nMultiple invalid config files";
-                    invalidConfig = true;
+                    string configFilePath = textFiles.FirstOrDefault(f =>
+                        Path.GetFileName(f).Equals("config.txt", StringComparison.OrdinalIgnoreCase) ||
+                        Path.GetFileName(f).Equals("config.txt.txt", StringComparison.OrdinalIgnoreCase));
+
+                    if (configFilePath != null)
+                    {
+                        fileContents = File.ReadAllText(configFilePath);
+                    }
+                    else
+                    {
+                        tv.text =
+                            "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nMultiple invalid config files";
+                        invalidConfig = true;
+                    }
                 }
+                lines = fileContents.Split('\n');
             }
 
-            string[] lines = fileContents.Split('\n');
-            pid = lines[0].Split(':')[1].Trim();
             if (enableOverride) pid = pidOverride;
-            session = int.Parse(lines[1].Split(':')[1].Trim());
+            else pid = lines[0].Split(':')[1].Trim();
+
             if (enableOverride) session = sessionOverride;
+            else session = int.Parse(lines[1].Split(':')[1].Trim());
+
             try
             {
-                condition = char.ToLower(char.Parse(lines[2].Split(':')[1].Trim()));
                 if (enableOverride) condition = char.ToLower(conditionOverride);
+                else condition = char.ToLower(char.Parse(lines[2].Split(':')[1].Trim()));
             }
             catch
             {
@@ -127,7 +135,11 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 
             try
             {
-                float height = float.Parse(lines[3].Split(':')[1].Trim());
+                float height;
+
+                if (enableOverride) height = heightOverride;
+                else height = float.Parse(lines[3].Split(':')[1].Trim());
+
                 if (height < 0.5f || height > 2.5f)
                 {
                     tv.text
@@ -147,8 +159,8 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             }
             try
             {
-                participantName = lines[4].Split(':')[1].Trim();
                 if (enableOverride) participantName = nameOverride;
+                else participantName = lines[4].Split(':')[1].Trim();
             }
             catch
             {

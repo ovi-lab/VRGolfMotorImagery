@@ -431,7 +431,7 @@ MonoBehaviour:
   tv: {fileID: 1450713087}
   xrOrigin: {fileID: 1939296438}
   blockTrailIndicator: {fileID: 444374908}
-  enableOverride: 0
+  enableOverride: 1
   randomizeSeed: 0
   pidOverride: 004
   sessionOverride: 1
@@ -461,12 +461,15 @@ MonoBehaviour:
   - StartRadius: 0.01
     EndRadius: 0.11
     Count: 10
+    DebugConsoleColor: {r: 1, g: 0.99419236, b: 0.06132078, a: 1}
   - StartRadius: 0.13
     EndRadius: 0.23
     Count: 10
+    DebugConsoleColor: {r: 0.90588236, g: 0.5520619, b: 0, a: 1}
   - StartRadius: 0.25
     EndRadius: 0.35
     Count: 10
+    DebugConsoleColor: {r: 0.972549, g: 0.015686259, b: 0.084702685, a: 1}
 --- !u!1 &40850374
 GameObject:
   m_ObjectHideFlags: 0

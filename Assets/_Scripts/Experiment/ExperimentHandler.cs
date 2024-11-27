@@ -230,7 +230,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             dataFilePath = Path.Combine(participantPath, dataFileName);
             File.WriteAllText(dataFilePath,
                 "pid,condition,session,block,trial,interrupted_trial,start_time,ball_fire_time,ball_stop_time,end_time,radial_error\n");
-            allBlocks = GetComponent<ConditionManager>().GenerateBlocks(condition, pid, session, enableOverride, randomizeSeed);
+            allBlocks = GetComponent<ConditionManager>().GenerateBlocks(condition, pid, session, randomizeSeed);
             receivedAllBlocks = true;
         }
         catch (Exception e)

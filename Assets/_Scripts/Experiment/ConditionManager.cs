@@ -32,10 +32,9 @@ public class ConditionManager : MonoBehaviour
     private bool isRandomConditionInvalid;
     private bool customParticipantOverride;
 
-    public List<Block> GenerateBlocks(char condition, string pid, int session, bool enableOverride = false , bool randomizeSeed = false)
+    public List<Block> GenerateBlocks(char condition, string pid, int session, bool randomizeSeed = false)
     {
         if (isRandomConditionInvalid) return null;
-        customParticipantOverride = enableOverride;
         if (!int.TryParse(pid, out int pidVal))
         {
             pidVal = 0;
@@ -91,7 +90,7 @@ public class ConditionManager : MonoBehaviour
             }
             allBlocks.Add(block);
         }
-        if(customParticipantOverride) PrintAllTrials();
+        PrintAllTrials();
     }
 
     private void GeneratePerfectCondition()
@@ -109,7 +108,7 @@ public class ConditionManager : MonoBehaviour
             }
             allBlocks.Add(block);
         }
-        if(customParticipantOverride) PrintAllTrials();
+        PrintAllTrials();
     }
 
     private void GenerateRandomCondition()
@@ -145,7 +144,7 @@ public class ConditionManager : MonoBehaviour
             block.Trials = trials;
             allBlocks.Add(block);
         }
-        if(customParticipantOverride) PrintAllTrials();
+        PrintAllTrials();
     }
 
     private void PrintAllTrials()

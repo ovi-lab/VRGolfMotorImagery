@@ -8,6 +8,8 @@ using Random = System.Random;
 
 public class ConditionManager : MonoBehaviour
 {
+    [SerializeField] private bool enableGizmos;
+
     [Header("Experiment Settings")]
     [SerializeField] private int blockCount;
     [SerializeField] private int trialCountPerBlock;
@@ -23,6 +25,7 @@ public class ConditionManager : MonoBehaviour
     [SerializeField] private Transform holeTransform;
 
     [Header("Random Condition Settings")]
+    [SerializeField] private Transform golfBall;
     [SerializeField, DataTable] private List<ErrorRadiusWithCount> errors;
 
     private int totalErrorCount;
@@ -220,17 +223,37 @@ public class ConditionManager : MonoBehaviour
 
     private List<Vector3> GenerateErrorPositions()
     {
+        bool validAngle = false;
+        Vector3 errorPosition = Vector3.zero;
+
+        Vector3 ballToHole = holeTransform.position - golfBall.position;
+        float ballToHoleMag = ballToHole.magnitude;
+
+        Vector3 holeLeft = holeTransform.position + Vector3.Cross(ballToHole, Vector3.up).normalized * 0.055f;
+        Vector3 holeRight = holeTransform.position + -Vector3.Cross(ballToHole, Vector3.up).normalized * 0.055f;
+        Vector3 ballLeft = holeLeft - holeTransform.position + golfBall.position;
+
+        float leftLimit = Vector3.Angle(ballLeft-golfBall.position, holeLeft-golfBall.position);
+        float rightLimit = Vector3.Angle(ballLeft-golfBall.position, holeRight-golfBall.position);
+
         List<Vector3> errorPositions = new List<Vector3>();
         foreach (ErrorRadiusWithCount error in errors)
         {
             for (int i = 0; i < error.Count; i++)
             {
                 float errorRadius = random.NextFloat(error.StartRadius + HOLE_RADIUS, error.EndRadius + HOLE_RADIUS);
-                float errorAngle = random.NextFloat(-175f, 175f);
-                Vector3 errorPosition = holeTransform.position +
-                                        Quaternion.AngleAxis(errorAngle, transform.up) * transform.forward *
-                                        errorRadius;
+                while(!validAngle)
+                {
+                    float errorAngle = random.NextFloat(-180f, 180f);
+                    errorPosition = holeTransform.position + Quaternion.AngleAxis(errorAngle, transform.up) * transform.forward * errorRadius;
+                    Vector3 ballToPosition = errorPosition - golfBall.position;
+                    float ballToPositionAngle = Vector3.Angle(ballToPosition, ballLeft-golfBall.position);
+                    float ballToPositionMag = ballToPosition.magnitude;
+                    if (ballToPositionAngle >= leftLimit && ballToPositionAngle <= rightLimit && ballToPositionMag >= ballToHoleMag) validAngle = false;
+                    else validAngle = true;
+                }
                 errorPositions.Add(errorPosition);
+                validAngle = false;
             }
         }
         errorPositions.Shuffle(random);
@@ -239,6 +262,7 @@ public class ConditionManager : MonoBehaviour
 #if UNITY_EDITOR
     void OnDrawGizmos()
     {
+        if (!enableGizmos) return;
         Handles.color = Color.red; // Set line color
         Vector3 center = holeTransform.position;
         int segments = 250;
@@ -263,6 +287,27 @@ public class ConditionManager : MonoBehaviour
             Handles.DrawAAPolyLine(7, ringPoints);
             colIdx++;
         }
+
+        Vector3 ballToHole = holeTransform.position - golfBall.position;
+        Vector3 holeLeft = holeTransform.position + (Vector3.Cross(ballToHole, Vector3.up).normalized) * 0.055f;
+        Vector3 holeRight = holeTransform.position + (-Vector3.Cross(ballToHole, Vector3.up).normalized) * 0.055f;
+        Vector3 ballLeft = holeLeft - holeTransform.position + golfBall.position;
+        Vector3 ballRight = holeRight - holeTransform.position + golfBall.position;
+
+        Handles.color = Color.green;
+        Handles.DrawLine(golfBall.position, holeTransform.position, 3f);
+        Handles.color = Color.blue;
+        Handles.DrawLine(holeTransform.position, holeLeft, 3f);
+        Handles.color = Color.cyan;
+        Handles.DrawLine(holeTransform.position, holeRight, 3f);
+        Handles.color = Color.red;
+        Handles.DrawLine(golfBall.position, holeLeft, 3f);
+        Handles.color = Color.magenta;
+        Handles.DrawLine(golfBall.position, holeRight, 3f);
+        Handles.color = Color.yellow;
+        Handles.DrawLine(golfBall.position, ballLeft, 3f);
+        Handles.color = Color.gray;
+        Handles.DrawLine(golfBall.position, ballRight, 3f);
     }
 #endif
 }

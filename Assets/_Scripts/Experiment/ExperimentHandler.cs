@@ -259,11 +259,6 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
         if (!enableOverride) randomizeSeed = false;
     }
 
-    private void PrintAllBlocks()
-    {
-
-    }
-
     private void HandleInput()
     {
         if (invalidConfig) return;
@@ -429,8 +424,6 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             $"{pid},{condition},{session},{block},{trial},False,{startTime},{ballFireTime},{ballStopTime},{endTime},{radialErrorString}\n";
         File.AppendAllText(dataFilePath, logEntry);
         if(enableConsoleDebugging) Debug.Log("Logged Data");
-        if(enableConsoleDebugging) Debug.Log($"Radial Error: {radialError}");
-        if(enableConsoleDebugging) Debug.Log($"Actual Distance: {Vector3.Distance(controller.transform.position, controller.HoleTransform.position)}");
     }
 
     private void UndoTrial()

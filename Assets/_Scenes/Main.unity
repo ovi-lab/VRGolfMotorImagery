@@ -450,6 +450,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63d64e8305da4f04bb1db24c584b6fe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enableGizmos: 1
   blockCount: 15
   trialCountPerBlock: 6
   minErroneousTrialsPerBlock: 1
@@ -457,6 +458,7 @@ MonoBehaviour:
   minTime: 6
   maxTime: 8
   holeTransform: {fileID: 1650509753}
+  golfBall: {fileID: 236231306}
   errors:
   - StartRadius: 0.01
     EndRadius: 0.11
@@ -1023,7 +1025,7 @@ Transform:
   m_GameObject: {fileID: 236231305}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.0522, y: 0, z: -3.1674}
+  m_LocalPosition: {x: -0.078, y: 0, z: -3.282}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -4671,7 +4673,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 72ea452a41eed3e4fa124df6ca6aff93,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7071067
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 72ea452a41eed3e4fa124df6ca6aff93,
         type: 3}
@@ -4686,12 +4688,12 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 72ea452a41eed3e4fa124df6ca6aff93,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 72ea452a41eed3e4fa124df6ca6aff93,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 72ea452a41eed3e4fa124df6ca6aff93,
         type: 3}

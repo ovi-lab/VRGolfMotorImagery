@@ -431,6 +431,7 @@ MonoBehaviour:
   tv: {fileID: 1450713087}
   xrOrigin: {fileID: 1939296438}
   blockTrailIndicator: {fileID: 444374908}
+  hole: {fileID: 1650509753}
   enableOverride: 0
   randomizeSeed: 0
   pidOverride: 004

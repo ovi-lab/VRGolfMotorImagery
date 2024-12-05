@@ -36,6 +36,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     [SerializeField] private TextMeshProUGUI tv;
     [SerializeField] private XROrigin xrOrigin;
     [SerializeField] private TextMeshProUGUI blockTrailIndicator;
+    [SerializeField] private Transform hole;
 
     [FoldoutGroup("Custom Participant Parameters Override", nameof(enableOverride), nameof(randomizeSeed), nameof(pidOverride), nameof(sessionOverride), nameof(conditionOverride), nameof(nameOverride), nameof(heightOverride))]
     [SerializeField] private Void groupHolder;
@@ -229,7 +230,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 
             dataFilePath = Path.Combine(participantPath, dataFileName);
             File.WriteAllText(dataFilePath,
-                "pid,condition,session,block,trial,interrupted_trial,start_time,ball_fire_time,ball_stop_time,end_time,radial_error\n");
+                "pid,condition,session,block,trial,interrupted_trial,start_time,ball_fire_time,ball_stop_time,end_time,radial_error,error_position_x,error_position_y\n");
             allBlocks = GetComponent<ConditionManager>().GenerateBlocks(condition, pid, session, randomizeSeed);
             receivedAllBlocks = true;
         }
@@ -420,8 +421,10 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
     private void LogData(float radialError)
     {
         string radialErrorString = radialError >= 0 ? radialError.ToString(CultureInfo.InvariantCulture) : "N/A";
+        Vector3 radialPosition = radialError == 0 ? Vector3.zero : controller.transform.position - hole.position;
+        Vector2 radialPositionStr = -(new Vector2(radialPosition.x, radialPosition.z));
         string logEntry =
-            $"{pid},{condition},{session},{block},{trial},False,{startTime},{ballFireTime},{ballStopTime},{endTime},{radialErrorString}\n";
+            $"{pid},{condition},{session},{block},{trial},False,{startTime},{ballFireTime},{ballStopTime},{endTime},{radialErrorString},{radialPositionStr.x},{radialPositionStr.y}\n";
         File.AppendAllText(dataFilePath, logEntry);
         if(enableConsoleDebugging) Debug.Log("Logged Data");
     }
@@ -459,11 +462,11 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             string logFailedEntry = $"{pid},{condition},{session},{block},{trial},True,{startTime}";
             if (isBallMoving)
             {
-                logFailedEntry += $",{ballFireTime},N/A,N/A,N/A";
+                logFailedEntry += $",{ballFireTime},N/A,N/A,N/A,N/A,N/A";
             }
             else
             {
-                logFailedEntry += ",N/A,N/A,N/A,N/A";
+                logFailedEntry += ",N/A,N/A,N/A,N/A,N/A,N/A";
             }
             controller.Phaser.Disappear();
             controller.ResetBall();

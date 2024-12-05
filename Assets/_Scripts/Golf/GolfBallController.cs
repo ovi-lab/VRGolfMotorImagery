@@ -39,7 +39,7 @@ public class GolfBallController : MonoBehaviour
         if (!isMoving) return;
         Vector3 direction = (targetPosition - transform.position).normalized;
         float distance = Vector3.Distance(transform.position, targetPosition);
-        if(distance > 0.01f && (rb.velocity.magnitude > 0.02f || distance > 1f))
+        if(distance > 0.01f && (rb.velocity.magnitude > 0.005f || distance > 1f))
         {
             float easingFactor = 1 - Mathf.Exp(-distance * 0.22f);
             rb.velocity = (direction * (easingFactor * maxSpeed)).XZPlane(-1.2f); //hack to make falling look realistic
@@ -85,7 +85,7 @@ public class GolfBallController : MonoBehaviour
     {
         if (!isMoving) return;
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(targetPosition, 0.08f);
+        Gizmos.DrawWireSphere(targetPosition, 0.03f);
     }
 
     public void ResetBall()

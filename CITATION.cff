@@ -1,0 +1,24 @@
+cff-version: 1.0.0
+message: "If you use this software, please cite it as below."
+title: "VR Golf Motor Imagery"
+version: "2.3.2"
+repository-code: "https://github.com/ovi-lab/VRGolfMotorImagery"
+license: "MIT"
+authors:
+  - family-names: "Balay"
+    given-names: "Celine"
+    affiliation: "University of British Columbia"
+  - family-names: "Banerjee"
+    given-names: "Rishav"
+    affiliation: "University of British Columbia"
+  - family-names: "Irani"
+    given-names: "Pourang"
+    affiliation: "University of British Columbia"
+  - family-names: "Kraeutner"
+    given-names: "Sarah"
+    affiliation: "University of British Columbia"
+date-released: "2024-09-26"
+keywords:
+  - Motor Imagery
+  - Virtual Reality
+  - Adaptive Learning

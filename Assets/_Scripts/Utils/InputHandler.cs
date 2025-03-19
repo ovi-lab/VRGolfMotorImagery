@@ -2,6 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.XR.Interaction.Toolkit;
+// this project most likely won't have another major XRI version upgrade
+// having the action based controller as it is right now should suffice
+#pragma warning disable CS0618 // Type or member is obsolete
 
 public class InputHandler : SingletonMonoBehavior<InputHandler>
 {

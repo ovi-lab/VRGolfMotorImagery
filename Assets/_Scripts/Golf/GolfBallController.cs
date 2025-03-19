@@ -28,7 +28,7 @@ public class GolfBallController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        rb.velocity = Vector3.zero;
+        rb.linearVelocity = Vector3.zero;
         isMoving = false;
         phaser.PhaseOut();
         StartCoroutine(EndAnimTime(phaser.AnimTime));
@@ -39,15 +39,15 @@ public class GolfBallController : MonoBehaviour
         if (!isMoving) return;
         Vector3 direction = (targetPosition - transform.position).normalized;
         float distance = Vector3.Distance(transform.position, targetPosition);
-        if(distance > 0.01f && (rb.velocity.magnitude > 0.005f || distance > 1f))
+        if(distance > 0.01f && (rb.linearVelocity.magnitude > 0.005f || distance > 1f))
         {
             float easingFactor = 1 - Mathf.Exp(-distance * 0.22f);
-            rb.velocity = (direction * (easingFactor * maxSpeed)).XZPlane(-1.2f); //hack to make falling look realistic
-            // Debug.Log($"==={distance}==={rb.velocity.magnitude}===");
+            rb.linearVelocity = (direction * (easingFactor * maxSpeed)).XZPlane(-1.2f); //hack to make falling look realistic
+            // Debug.Log($"==={distance}==={rb.linearVelocity.magnitude}===");
         }
         else
         {
-            rb.velocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
             isMoving = false;
             phaser.PhaseOut();
             StartCoroutine(EndAnimTime(phaser.AnimTime));
@@ -91,7 +91,7 @@ public class GolfBallController : MonoBehaviour
     public void ResetBall()
     {
         transform.position = startPosition;
-        rb.velocity = Vector3.zero;
+        rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         transform.rotation = Quaternion.identity;
         isMoving = false;

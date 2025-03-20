@@ -57,6 +57,9 @@ public class ConditionManager : MonoBehaviour
             case 'r':
                 GenerateRandomCondition();
                 return allBlocks;
+            case 'n':
+                GenerateControlCondition();
+                return allBlocks;
             default:
                 throw new Exception("Not a valid condition type");
         }

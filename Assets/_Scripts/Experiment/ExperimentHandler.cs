@@ -172,7 +172,7 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
             string dataFileName = $"{pid}_{condition}_{session}_{dateTime}.csv";
             string dataDirectory = Path.Combine(Application.persistentDataPath, "Data");
 
-            if (condition is not 'c' and not 'p' and not 'r')
+            if (condition is not 'c' and not 'p' and not 'r' and not 'n')
             {
                 tv.text
                     = "Something has gone wrong\nPlease ask the on-site researcher to check the experiment configuration setup\nInvalid Condition";
@@ -180,11 +180,23 @@ public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
                 return;
             }
 
+            if (condition is 'n')
+            {
+                GameObject.FindWithTag("MainCamera").GetComponent<Camera>().enabled = false;
+                GameObject.FindWithTag("NeutralCam").GetComponent<Camera>().enabled = true;
+            }
+            else
+            {
+                GameObject.FindWithTag("MainCamera").GetComponent<Camera>().enabled = true;
+                GameObject.FindWithTag("NeutralCam").GetComponent<Camera>().enabled = false;
+            }
+
             int conditionCode = condition switch
             {
                 'c' => 0,
                 'p' => 1,
                 'r' => 2,
+                'n' => 3,
                 _ => -1
             };
 

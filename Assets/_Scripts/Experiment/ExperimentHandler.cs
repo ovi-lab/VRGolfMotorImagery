@@ -14,16 +14,17 @@ using Void = EditorAttributes.Void;
 [RequireComponent(typeof(ConditionManager))]
 public class ExperimentHandler : SingletonMonoBehavior<ExperimentHandler>
 {
-    [Header("Messages")]
-    [TextArea, SerializeField] private string welcomeMessage;
-    [TextArea, SerializeField] private string welcomeBackMessage;
-    [TextArea, SerializeField] private string motorImageryMessage;
-    [TextArea, SerializeField] private string golfMessage;
-    [TextArea, SerializeField] private string trialEndMessage;
-    [TextArea, SerializeField] private string blockEndMessage;
-    [TextArea, SerializeField] private string canceledPreviousTrial;
-    [TextArea, SerializeField] private string canceledCurrentTrial;
-    [TextArea, SerializeField] private string thanksMessage;
+    [FoldoutGroup("Messages", nameof(welcomeMessage), nameof(welcomeBackMessage),nameof(motorImageryMessage),nameof(golfMessage), nameof(trialEndMessage), nameof(blockEndMessage),nameof(canceledPreviousTrial),nameof(canceledCurrentTrial), nameof(thanksMessage))]
+    [SerializeField] private Void messagesGroup;
+    [TextArea, SerializeField, HideProperty] private string welcomeMessage;
+    [TextArea, SerializeField, HideProperty] private string welcomeBackMessage;
+    [TextArea, SerializeField, HideProperty] private string motorImageryMessage;
+    [TextArea, SerializeField, HideProperty] private string golfMessage;
+    [TextArea, SerializeField, HideProperty] private string trialEndMessage;
+    [TextArea, SerializeField, HideProperty] private string blockEndMessage;
+    [TextArea, SerializeField, HideProperty] private string canceledPreviousTrial;
+    [TextArea, SerializeField, HideProperty] private string canceledCurrentTrial;
+    [TextArea, SerializeField, HideProperty] private string thanksMessage;
 
     [Header("Additional Parameters")]
     [Range(2, 10), SerializeField] private int maximumSessionCount;
